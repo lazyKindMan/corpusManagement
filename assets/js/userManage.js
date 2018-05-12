@@ -4,7 +4,7 @@ function addLevelEvent(){
         var changeVal=$(this).children("option:selected").text();
         if(confirm("确定要将此用户级别改成"+changeVal))
         {
-
+            
         }
         else
         {
@@ -84,4 +84,5 @@ $(document).ready(function () {
             addLevelEvent();
         },"json"
     );
+
 });
