@@ -71,7 +71,9 @@ $this->title='语料库管理系统';
 <!--                    <strong>注意: </strong>在此处注册证明你同意我们的  <a href="#">条款和事项</a>-->
                     <?php $form=ActiveForm::begin(['id'=>'form-signup',
                         'enableAjaxValidation'=>true,
-                        'validationUrl' => Url::toRoute(['signup']),]);?>
+                        'validationUrl' => Url::toRoute(['signup']),
+                        'validateOnChange'=>false,
+                        ]);?>
                         <?=$form->field($model,'username')->label('注册用户名')->textInput()?>
                         <?=$form->field($model,'email')->label('注册邮箱')?>
                         <?=$form->field($model,'password')->label('登录密码')->passwordInput()?>

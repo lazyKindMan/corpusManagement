@@ -7,6 +7,9 @@
  */
 
 namespace app\controllers;
+use app\models\Authority;
+use app\models\UserAthu;
+use app\models\users\updateUserForm;
 use yii;
 use app\models\adminLoginForm;
 use app\models\MyUser;
@@ -33,41 +36,6 @@ class AdminController extends Controller
             }
         }
         return $this->render("login",['model'=>$adminLoginForm]);
-    }
-
-    /**
-     * @return string|yii\web\Response
-     */
-    public function actionUserManage()
-    {
-        //获取cookie值
-        //如果游客没登录或者登录判定不为管理员
-        if(!yii::$app->user->isGuest)
-        {
-            $id=yii::$app->user->id;
-            if(MyUser::validateAdmin($id))
-            {
-                $query=MyUser::find();
-                //创建dataprovider类
-                $dataProvider = new ActiveDataProvider([
-                    'query'=>$query,
-                    'pagination'=>[
-                        'pageSize'=>6,
-                            ],
-                ]);
-//                $searchModel = new MyUserSearch();
-//                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-                $query->joinWith(['level']);
-                $query->select('tb_user.*,tb_userlevel.level_name');
-                //增加条件
-                $username=yii::$app->request->post("username")? trim(yii::$app->request->post("username")," "):'';
-                $level_id=(yii::$app->request->post("level_id")&&yii::$app->request->post("level_id")!='0')? intval(yii::$app->request->post("level_id")):'';
-                $query->andFilterWhere(['like','username',$username])->andFilterWhere(['level_id'=>$level_id]);
-                return $this->render('userManage',['dataProvider'=>$dataProvider]);
-            }
-            return $this->redirect(['login']);
-        };
-        return $this->redirect(['login']);
     }
 
     /**
@@ -155,20 +123,6 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * 跟新用户登录状态信息
-     * @return string  返回1表示修改成功，返回0表示修改失败
-     */
-    public function actionUpdateStatus()
-    {
-        $userId=yii::$app->request->post('id');
-        $userInfo=MyUser::find()->where(['id'=>$userId])->one();
-        $userInfo->canlogin=intval(yii::$app->request->post('status'));
-//        return var_dump($userInfo->canlogin);
-        if($userInfo->save())
-            return json_encode(1);
-        else return json_encode(0);
-    }
     public function actionLogout()
     {
         if(!yii::$app->user->isGuest)
@@ -182,7 +136,21 @@ class AdminController extends Controller
         if(!yii::$app->user->isGuest) {
             $id = yii::$app->user->id;
             if (MyUser::validateAdmin($id)) {
-                    return $this->render('index');
+                $query=MyUser::find();
+                //创建dataprovider类
+                $dataProvider = new ActiveDataProvider([
+                    'query'=>$query,
+                    'pagination'=>[
+                        'pageSize'=>6,
+                    ],
+                ]);
+//                $searchModel = new MyUserSearch();
+//                $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+                $query->joinWith(['level']);
+                $query->select('tb_user.*,tb_userlevel.level_name');
+                if(!MyUser::checkCurrrentUserManageUser('用户管理'))
+                    $dataProvider=null;
+                    return $this->render('index',['dataProvider'=>$dataProvider]);
             }
             return $this->redirect(['login']);
         }
@@ -198,5 +166,75 @@ class AdminController extends Controller
         $select.='tb_user.level_id,tb_userlevel.level_name as level_name';
         $res=MyUser::find()->joinWith(['level'])->select($select)->where(['id'=>yii::$app->user->id])->asArray()->one();
         return json_encode($res);
+    }
+    /*
+     * 用户提交修改信息
+     */
+    public function actionUpdateMessage()
+    {
+        if(yii::$app->user->isGuest)
+            return json_encode(0);
+        $user=MyUser::findOne(yii::$app->user->id);
+        $user->realname=yii::$app->request->post('realname')?yii::$app->request->post('realname'):$user->realname;
+        $user->email=yii::$app->request->post('email')?yii::$app->request->post('email'):$user->realname;
+        $user->sex=(yii::$app->request->post('sex')!=null)?intval(yii::$app->request->post('sex')):$user->sex;
+//        var_dump($user->sex);
+        $user->workplace=yii::$app->request->post('workplace')?yii::$app->request->post('workplace'):$user->workplace;
+        if(!yii::$app->request->post('level_name'))
+            return json_encode(0);
+        $user->level_name=yii::$app->request->post('level_name');
+//        $user->level_name='超级管理员';
+        if($user->save())
+            return json_encode(1);
+        return json_encode(2);
+    }
+    //用户详情
+    public function actionGetDetail()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return "0";
+        if(($id=yii::$app->request->post('id'))!=null)
+        {
+            $select='tb_user.id as id,tb_user.username as username,tb_user.email as email,tb_user.workplace as workplace,tb_user.realname as realname,tb_user.sex as sex,';
+            $select.='tb_user.level_id,tb_userlevel.level_name as level_name,tb_user.created_at as created_at,tb_user.updated_at as updated_at';
+            $query=MyUser::find()->joinWith(['level'])->select($select)->where(['id'=>$id]);
+            $dataProvider=new ActiveDataProvider([
+                'query'=>$query
+            ]);
+            $dataProvider->setSort(false);
+            return $this->renderAjax("getDetail",['dataProvider'=>$dataProvider]);
+        }
+        return "0";
+
+    }
+    public function actionUpdateModal()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return "0";
+        if(!MyUser::checkCurrrentUserManageUser('用户管理'))//若无权限管理用户
+            return "0";
+        if(($id=yii::$app->request->post('id'))!=null)
+        {
+            $user=MyUser::find()->joinWith(['level'])->where(['id'=>$id])->one();
+            //权限复选框信息
+            $authorities=yii\helpers\ArrayHelper::map(Authority::getAuthorities(),'authority_id','authority_name');
+            $userAuthorities=UserAthu::find()->where(['id'=>$id])->all();
+            return $this->renderAjax("updateModal",['model'=>$user,'authorities'=>$authorities,'userAuthorities'=>$userAuthorities]);
+        }
+    }
+    public function actionCorpusManage()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return "0";
+        if(!MyUser::checkCurrrentUserManageUser(yii::$app->request->get('authority_name')))
+            return "0";
+        return $this->renderAjax("corpusManage");
+
+    }
+    private static function test_input($data) {
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data);
+        return $data;
     }
 }

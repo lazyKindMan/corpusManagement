@@ -32,8 +32,8 @@ class Authority extends \yii\db\ActiveRecord
     /*
      * @return array 查询所有权限结果
      */
-    public function getAuthorities()
+    public static function getAuthorities()
     {
-        return self::find()->asArray();
+        return self::find()->asArray()->all();
     }
 }
