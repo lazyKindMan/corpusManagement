@@ -7,17 +7,15 @@ $(document).ready(function () {
             if(data['code']==1)//全部菜单开放
             {
                 $("#menu").append("<a href=\"#corpusManage\" class=\"list-group-item\" data-toggle=\"tab\" onclick=\"loadTab(this)\">"+data['authorities'][0]['authority_name']+"</a>\n" +
-                    "                        <a href=\"#corpusSubmit\" class=\"list-group-item\" data-toggle=\"tab\">"+data['authorities'][1]['authority_name']+"</a>\n" +
-                    "                        <a href=\"#userManage\" class=\"list-group-item\" data-toggle=\"tab\">"+data['authorities'][2]['authority_name']+"</a>\n" +
-                    "                        <a href=\"#corpusCheck\" class=\"list-group-item\" data-toggle=\"tab\">"+data['authorities'][3]['authority_name']+"</a>"+
-                    "<a href=\"#cralwerMange\" class=\"list-group-item\" data-toggle=\"tab\">"+data['authorities'][4]['authority_name']+"</a>");
+                    "<a href=\"#userManage\" class=\"list-group-item\" data-toggle=\"tab\">"+data['authorities'][1]['authority_name']+"</a>\n"+
+                "<a href='#corpusCheck' class=\"list-group-item\" data-toggle=\"tab\">"+data['authorities'][2]['authority_name']+"</a>");
             }
             if(data['code']==2)
             {
                 for(var i=0;i<data['userAuthorities'].length;i++)
                 {
                     var res=getNameAndHerf(data['authorities'],data['userAuthorities'][i]);
-                    $("#menu").append("<a href=\"#"+res[0]+"\" class=\"list-group-item\" data-toggle=\"tab\">"+res[1]+"</a>\n");
+                    $("#menu").append("<a href=\""+res[0]+"\" class=\"list-group-item\" data-toggle=\"tab\">"+res[1]+"</a>\n");
                 }
             }
             changeTab();

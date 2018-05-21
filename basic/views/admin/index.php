@@ -15,6 +15,7 @@ $code=rand(1,100);
 $this->registerJsFile('@web/js/loadMenu.js?'.$code,["depends"=>["app\assets\AppAsset"],"position"=> $this::POS_END]);
 $this->registerJsFile('@web/js/modal.js?'.$code,["depends"=>["app\assets\AppAsset"],"position"=> $this::POS_END]);
 $this->registerJsFile('@web/js/loadTab.js?'.$code,["depends"=>["app\assets\AppAsset"],"position"=> $this::POS_END]);
+$this->registerJsFile('@web/js/corpusManage.js?'.$code,["depends"=>["app\assets\AppAsset"],"position"=> $this::POS_END]);
 ?>
 <section id="main">
     <div class="container">

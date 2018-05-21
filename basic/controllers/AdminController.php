@@ -8,6 +8,10 @@
 
 namespace app\controllers;
 use app\models\Authority;
+use app\models\corpus\CorporaDictionary;
+use app\models\corpus\CorporaDictionaryQuery;
+use app\models\corpus\createDictionarnForm;
+use app\models\corpus\DictionaryUploadFile;
 use app\models\UserAthu;
 use app\models\users\updateUserForm;
 use yii;
@@ -222,14 +226,70 @@ class AdminController extends Controller
             return $this->renderAjax("updateModal",['model'=>$user,'authorities'=>$authorities,'userAuthorities'=>$userAuthorities]);
         }
     }
+
+    /**
+     * @return string
+     */
     public function actionCorpusManage()
     {
         if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
             return "0";
         if(!MyUser::checkCurrrentUserManageUser(yii::$app->request->get('authority_name')))
             return "0";
-        return $this->renderAjax("corpusManage");
+        $query=CorporaDictionary::find();
+        $dataProvider=new ActiveDataProvider([
+            'query'=>$query,
+            'pagination'=>[
+                'pageSize'=>6,
+                ]
+        ]);
+        return $this->renderAjax("corpusManage",['dataProvider'=>$dataProvider]);
 
+    }
+    public function actionUploadFile()
+    {
+        $code=0;
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+//            $code=2;
+        if(!MyUser::checkCurrrentUserManageUser('语料库管理'))
+            $code=2;
+        $res=array();
+        if($_FILES['upload_txt'])
+        {
+            Yii::$app->response->format='json';
+            $uploadFileModel=new DictionaryUploadFile();
+            $uploadFileModel->txtFile=$_FILES['upload_txt'];
+                if($uploadFileModel->validateAndSave())
+                    $code=1;
+        }
+        $res['code']=$code;
+        if($code===1)
+        {
+            $keys=$uploadFileModel->getDetailSetting();
+            $res['keys']=$keys;
+            $res['all_level_count']=$uploadFileModel->all_level_count;
+        }
+        echo json_encode($res);
+    }
+    public function actionCreateDicCorpus()
+    {
+        $createModel=new createDictionarnForm();
+        $createModel->corpusName=yii::$app->request->post('corpusName')!=null?yii::$app->request->post('corpusName'):null;
+        $createModel->corpusPre=yii::$app->request->post('corpusPre')!=null?yii::$app->request->post('corpusPre'):null;
+        $createModel->arrKeys=yii::$app->request->post('keys')!=null?yii::$app->request->post('keys'):null;
+        $createModel->arrLevels=yii::$app->request->post('levels')!=null?yii::$app->request->post('levels'):null;
+        $createModel->levelNames=yii::$app->request->post('levelNames')!=null?yii::$app->request->post('levelNames'):null;
+        try{
+            if($createModel->createCorpus())
+                echo json_encode(1);
+        }catch (\Exception $e)
+        {
+            echo json_encode($e->getMessage());
+        }
+        catch (\Throwable $e)
+        {
+            echo json_encode($e->getMessage());
+        }
     }
     private static function test_input($data) {
         $data = trim($data);
