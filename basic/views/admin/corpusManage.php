@@ -6,6 +6,7 @@
  * Time: 22:33
  */
 use yii\grid\GridView;
+header("Content-type: text/html; charset=utf-8");
 ?>
 <h3>语料库管理</h3>
 <div class="hr-div"> <hr /></div>
@@ -24,6 +25,73 @@ use yii\grid\GridView;
                       [
                               'class' => 'yii\grid\SerialColumn',
                       ],
+                      [
+                           'attribute'=>'corpus_name',
+                          'format'=>'text',
+                          'label'=>'语料库名',
+                      ],
+                      [
+                          'attribute'=>'all_level_count',
+                          'format'=>'text',
+                          'label'=>'词典分级数',
+                      ],
+                      [
+                          'attribute'=>'created_at',
+                          'format'=>'text',
+                          'label'=>'语料创建时间',
+                      ],
+                      [
+                          'attribute'=>'updated_at',
+                          'format'=>'text',
+                          'label'=>'最近修改时间',
+                      ],
+                      [
+                          'label'=>'状态',
+                          "value"=>function($model)
+                          {
+                              if($model->is_checking==1)
+                                  return "正在审核";
+                              if($model->is_checking==2)
+                                  return "审核未通过";
+                              if($model->is_deleting==1)
+                                  return "正在审核删除";
+                              if($model->is_updating==1)
+                                  return "正在审核修改";
+                              else return "正常";
+                          }
+                      ],
+                      [
+                          'class'=>'yii\grid\ActionColumn',
+                          'template'=>'{showCorpus}  {deleteCorpus}',
+                          'buttons'=>[
+                                 "showCorpus"=>function($url,$model,$key){
+                                        if($model->is_checking===1||$model->is_checking===2)
+                                        return \yii\helpers\Html::button("查看语料库",[
+                                            'title'=>'查看语料',
+                                            'class'=>"btn btn-success",
+                                            'disabled'=>"disabled"
+                                        ]);
+                                        return \yii\helpers\Html::button("查看语料库",[
+                                         'title'=>'查看语料',
+                                         'class'=>"btn btn-success",
+                                     ]);
+                                 },
+                              "deleteCorpus"=>function($url,$model,$key)
+                              {
+                                  if($model->is_deleting===1||$model->is_checking===1||$model->is_checking===2||$model->is_updating===1)
+                                      return \yii\helpers\Html::button("删除语料库",[
+                                          'title'=>'删除语料',
+                                          'class'=>"btn btn-danger",
+                                          'disabled'=>"disabled"
+                                      ]);
+
+                                 return \yii\helpers\Html::button("删除语料库",[
+                                  'title'=>'删除语料',
+                                  'class'=>"btn btn-danger",
+                              ]);
+                              }
+                          ]
+                      ]
                   ],
               ]);
           }
@@ -33,7 +101,7 @@ use yii\grid\GridView;
           }
     ?>
     <?=\yii\helpers\Html::a("点击添加语料库","#addCorpusModal",['class'=>'col_lg-4 btn btn-success','onclick'=>'addCorpus()','data-toggle' => 'modal']);?>
-
+    <?=\yii\helpers\Html::a("管理文本语料","textCorpusManage.html",['class'=>'col_lg-4 btn btn-primary']);?>
     <?php \yii\widgets\Pjax::end();?>
 
 </div>
@@ -49,7 +117,7 @@ use yii\helpers\Url;
     'size'=>yii\bootstrap\Modal::SIZE_LARGE,
 ]);
 ?>
-<form class="form-horizontal" id="uploadCorpusForm" action="upload-file.html" enctype="multipart/form-data">
+<form class="form-horizontal" id="uploadCorpusForm" enctype="multipart/form-data" onsubmit="return false">
 <!--        <div class="form-group">-->
 <!--                <label class="control-label col-lg-2">语料库名</label>-->
 <!--                <div class="col-lg-8">-->
@@ -82,13 +150,13 @@ use yii\helpers\Url;
         <div class="alert alert-warning">警告：本系统目前仅支持单文件上传，文件每行的项由空格分割，项以key（分隔符）value形式存储，不支持其他格式文件上传</div>
         <div class="form-group">
              <div class="col-lg-offset- col-md-offset-2 col-sm-offset-2">
-                    <button class="btn btn-primary" id="uploadCorpus" type="submit" name="submit">下一步</button>
+                    <button class="btn btn-primary" id="uploadCorpus" onclick="upload(this)">下一步</button>
                     <div id="warning"></div>
             </div>
         </div>
     </form>
-    <form class="form-horizontal" id="createForm" action="create-dic-corpus.html" style="display: none">
+    <div class="form-horizontal" id="createForm" style="display: none">
 
-    </form>
+    </div>
 <?php
 \yii\bootstrap\Modal::end()?>

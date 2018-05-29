@@ -140,14 +140,6 @@ $this->registerJsFile('@web/js/rightGetAndShow?'.$code,["depends"=>["app\assets\
                         echo $e;
                     }
                     ?>
-                    <?php \yii\widgets\Pjax::end();?>
-                    <?php
-                    use yii\bootstrap\Modal;
-                    use yii\web\view;
-                    Modal::begin([
-                        'id'=>'updateRight-modal',
-                        'header' => '<h4 class="modal-title">权限修改</h4>',
-                    ]);
                     //ajax获取权限，增加保存和取消按钮
                     //加载动态js
                     ?>
@@ -155,36 +147,7 @@ $this->registerJsFile('@web/js/rightGetAndShow?'.$code,["depends"=>["app\assets\
                     <!--                        <label><input type="checkbox" value="">选项 1</label>-->
                     <!--                    </div>-->
                     <!--动态加载js                    -->
-                    <button class="btn btn-primary" id="updateRightsOk">修改</button>
-                    <button class="btn btn-danger"  id="updateRightsCancel">取消</button>
-                    <?php Modal::end();?>
-                    <?php
-                    Modal::begin(['id'=>'updatePassword-modal',
-                        'header'=>'<h4 class="modal-title">密码修改</h4>',
-                    ]);
-                    ?>
-                    <div class="form-group">
-                        <label>新密码:</label><input id="password" type="password" class="form-control">
-                        <label>请重复密码:</label><input id="repetePassword" type="password" class="form-control">
-                    </div>
-                    <button class="btn btn-primary" id="updatePasswordOk">确认</button>
-                    <button class="btn btn-danger" data-dismiss="modal">取消</button>
-                    <?php Modal::end();?>
-                    <?php
-                    Modal::begin(['id'=>'updateCanlogin-modal',
-                        'header'=>'<h4 class="modal-title">账号禁封</h4>',
-                    ]);?>
-                    <div class="form-group">
-                        <label>该用户当前账号状态为</label>
-                        <select id="userStatus">
-                            <option value=1>可以登录</option>
-                            <option value=0>无法登录</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" id="updateCanlogin">确认</button>
-                    <button class="btn btn-danger" data-dismiss="modal">取消</button>
-                    <?php Modal::end();?>
-                </div>
+
 
             </div>
             <div class="col-lg-3 col-md-3 col-sm-3">
@@ -203,6 +166,7 @@ $this->registerJsFile('@web/js/rightGetAndShow?'.$code,["depends"=>["app\assets\
                 </div>
             </div>
         </div>
-</section>         <style>
+</section>
+<style>
     .select_bg{ background:#BCC8D0;  }
 </style>

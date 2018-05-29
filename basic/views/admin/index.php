@@ -197,6 +197,9 @@ $this->registerJsFile('@web/js/corpusManage.js?'.$code,["depends"=>["app\assets\
             <div id="corpusManage" style="display: none" class="tab">
 
             </div>
+            <div id="corpusCheck" style="display: none" class="tab">
+
+            </div>
         </div>
     </div>
             <div class="col-lg-3 col-md-3 col-sm-3">

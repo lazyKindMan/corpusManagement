@@ -1,5 +1,43 @@
 $(document).ready(function () {
+    //监听表单提交
 });
+function upload(obj) {
+        var $form=document.getElementById('uploadCorpusForm');//不能为jquery对象
+        // console.log($form.find(".control-label"));
+        $('#warning').text('正在处理，请稍等！');
+        var formData=new FormData($form);
+        console.log(formData);
+        $.ajax({
+                url: "upload-file.html",
+                type: "POST",
+                data:formData,
+                dataType:"json",
+                async:true,
+                processData:false,
+                contentType:false,
+                beforeSend: function(xhr){
+                    $("#importForm :submit").attr("disabled",true);
+                },
+                complete: function(xhr,status){
+                    $("#importForm :submit").attr("disabled", false);
+                },
+                error: function(xhr,status,error){
+                    $('#warning').text('');
+                    alert("请求出错!");
+                },
+                success:function (res) {
+                    $('#warning').text('');
+                    if(res['code']==1)
+                    {
+                        $("#uploadCorpusForm").toggle('100');
+                        $("#createForm").toggle("100");
+                        createForm(res['all_level_count'],res['keys']);
+                    }
+                    else alert("输入有误");
+                }
+            }
+        );
+}
 function addCorpus() {
     $(".fileUpload").empty();
     var element="<label class=\"control-label col-lg-2\">语料文件上传</label>\n" +
@@ -9,43 +47,6 @@ function addCorpus() {
     $(".fileUpload").append(element);
     var path="upload-file.html";
     initFileInput("uploadFile",path);
-    //监听表单提交
-    $("#uploadCorpusForm").on('submit',function (event) {
-        var form=this;
-        $('#warning').text('正在处理，请稍等！');
-        var formData=new FormData(form);
-        $.ajax({
-                url: this.action,
-                type: "POST",
-                data:formData,
-                dataType:"json",
-                async:true,
-                processData:false,
-                contentType:false,
-            beforeSend: function(xhr){
-                $("#importForm :submit").attr("disabled",true);
-            },
-            complete: function(xhr,status){
-                $("#importForm :submit").attr("disabled", false);
-            },
-            error: function(xhr,status,error){
-                $('#warning').text('');
-                alert("请求出错!");
-            },
-            success:function (res) {
-                $('#warning').text('');
-                if(res['code']==1)
-                {
-                    $("#uploadCorpusForm").toggle('100');
-                    $("#createForm").toggle("100");
-                    createForm(res['all_level_count'],res['keys']);
-                }
-                else alert("输入有误");
-            }
-            }
-        );
-        return false;//阻止表单提交
-    })
 }
 function initFileInput(ctrlName,uploadUrl) {
     var control=$("#"+ctrlName);
@@ -83,14 +84,16 @@ function createForm(levelNum,keys) {
     for (var i=0;i<keys.length;i++)
     {
         var content="<div class=\"form-group\">\n" +
-            "            <label class=\"control-label col-lg-2 col-md-2\">键值:</label>\n" +
+            "            <label class=\"control-label col-lg-1 col-md-1\">键值:</label>\n" +
             "            <label class='form-control-static col-lg-2 col-md-2'>" +keys[i]+"</label> \n"+
             "            <label class=\"control-label col-lg-2 col-md-2\">所在层级:</label>\n" +
-            "            <div class=\"col-lg-3 col-md-3 col-sm-3\">\n" +
+            "            <div class=\"col-lg-2 col-md-2 col-sm-2\">\n" +
             "                <select class=\"level_num form-control\">\n" +
             "\n" +
             "                </select>\n" +
             "            </div>\n" +
+            "<label class=\"control-label col-lg-2 col-md-2\">键值别名:</label>\n"+
+            "<div class='col-lg-3 col-md-2 col-sm-2  alias'><input type='text' class='form-control'></div>\n"+
             "        </div>";
         $("#createForm").append(content);
     }
@@ -109,43 +112,76 @@ function createForm(levelNum,keys) {
         "</div>");
     //添加按钮
     $("#createForm").append("<button class=\"btn btn-primary\" id=\"backPre\">上一步</button>\n" +
-        "        <button class=\"btn btn-success\" id=\"submitCreateForm\">确认提交</button>");
+        "        <button class=\"btn btn-success\" id=\"CreateButton\">确认提交</button><div id=\"warning1\"></div>");
     //添加按钮事件
     $("#backPre").click(function () {
-        $("#uploadCorpusForm").toggle('100');
-        $("#createForm").toggle("100");
+        $(this).attr('disabled',"true");
+        $.post(
+            "delete-file.html",
+            {},
+            function (data) {
+                if(data==1)
+                {
+                    $("#uploadCorpusForm").toggle('100');
+                    $("#createForm").toggle("100");
+                    $(this).attr('disabled',"false");
+                }
+                else alert("文件撤销失败，请重试");
+            }
+        )
         return false;
     });
     //提交事件
-    $("#submitCreateForm").click('submit',function (event) {
-        var $keys=$("#createForm").find("label.form-control-static");//获取键值元素
-        var keyIdx=0;
-        var arrKeys=[];
-        $keys.each(function () {
-            arrKeys[keyIdx]=$(this).text();
-            keyIdx++;
-        })
-        var levelIdx=0;
-        var arrLevels=[]
-        var $level=$("#createForm").find("select");//获取键值对应的层级元素;
-        $level.each(function () {
-            arrLevels[levelIdx]=$(this).val();
-            levelIdx++;
-        })
+    $("#CreateButton").click(function () {
+        $(this).attr('disabled',"true");
+        $('#warning1').text('正在处理，请稍等！');
         //获取语料库名称
         var corpusName=$("#corpusName").val();
         var corpusPre=$("#corpusPre").val();
         //获取每一级名
-        var levelNames=[]
+        var levelNames=[];
         for(var i=1;i<levelNum;i++)
         {
             levelNames[i-1]=$("#level_"+(i+1)).val();
         }
+        var levelKey=new Array();
+        //获取每一层的键值和其别名
+        $("#createForm").find("select").each(function () {
+            var levelNum=$(this).val()-2;
+            if(!levelKey.hasOwnProperty(levelNum))
+            {
+                levelKey[levelNum]=new Array();
+            }
+                var $key=$(this).parent().siblings(".form-control-static").text();
+                console.log($key);
+                var $alias=$(this).parent().siblings(".alias").find("input").val()  ;
+                levelKey[levelNum].push($key);
+                levelKey[levelNum].push($alias);
+        });
+        console.log(levelKey);
         $.post(
-            $this.action,
-            {keys:arrKeys,levels:arrLevels,corpusName:corpusName,corpusPre:corpusPre,levelNames:levelNames},
+            "create-dic-corpus.html",
+            {corpusName:corpusName,corpusPre:corpusPre,levelNames:levelNames,levelKey:levelKey},
             function (data) {
-                console.log(data);
+                console.log(levelKey);
+                if(data==1)
+                {
+                    alert('添加成功，进入审核');
+                    //关闭模态框并清除词典
+                    $("#addCorpusModal").modal("hide");
+                    $("#uploadCorpusForm").toggle();
+                    $("#createForm").toggle();
+                    $(".fileUpload").empty();
+                    var element="<label class=\"control-label col-lg-2\">语料文件上传</label>\n" +
+                        "            <div class=\"col-lg-8\">\n" +
+                        "                <input type=\"file\" name=\"upload_txt\" id=\"uploadFile\" class=\"file\">\n" +
+                        "            </div>";
+                    $(".fileUpload").append(element);
+                }
+                else alert(data);
+                $(this).attr('disabled',"false");
+                $('#warning1').text('');
+                window.reload();
             },"json"
         );
         return false;

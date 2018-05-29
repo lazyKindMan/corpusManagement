@@ -271,25 +271,78 @@ class AdminController extends Controller
         }
         echo json_encode($res);
     }
+    public function actionDeleteFile()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            die(json_encode(0));
+        if(!MyUser::checkCurrrentUserManageUser('语料库管理'))
+            die(json_encode(2));
+        if(!unlink(yii::$app->session->get("DFile_path")))
+        {
+            die(json_encode(3));
+        }
+            die(json_encode(1));
+
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function actionCreateDicCorpus()
     {
         $createModel=new createDictionarnForm();
         $createModel->corpusName=yii::$app->request->post('corpusName')!=null?yii::$app->request->post('corpusName'):null;
         $createModel->corpusPre=yii::$app->request->post('corpusPre')!=null?yii::$app->request->post('corpusPre'):null;
-        $createModel->arrKeys=yii::$app->request->post('keys')!=null?yii::$app->request->post('keys'):null;
-        $createModel->arrLevels=yii::$app->request->post('levels')!=null?yii::$app->request->post('levels'):null;
+        $createModel->levelKey=yii::$app->request->post('levelKey')!=null?yii::$app->request->post('levelKey'):null;
         $createModel->levelNames=yii::$app->request->post('levelNames')!=null?yii::$app->request->post('levelNames'):null;
-        try{
-            if($createModel->createCorpus())
+        ini_set('memory_limit', '2048M');
+        try {
+            if ($createModel->createCorpus())
+            {
                 echo json_encode(1);
-        }catch (\Exception $e)
-        {
-            echo json_encode($e->getMessage());
+            }
+        } catch (\Exception $e) {
+            echo json_encode($e->getMessage()." ".$e->getFile()." in ".$e->getLine());
         }
-        catch (\Throwable $e)
-        {
-            echo json_encode($e->getMessage());
-        }
+
+    }
+    public function actionCorpusCheck()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return "0";
+        if(!MyUser::checkCurrrentUserManageUser(yii::$app->request->get('authority_name')))
+            return "0";
+        return $this->renderAjax("corpusCheck");
+    }
+    //测试页面
+    public function actionTest()
+    {
+        $createModel=new createDictionarnForm();
+        $createModel->corpusName="ICD字典";
+        $createModel->levelKey=array();
+        $createModel->levelKey[]=array(
+            0=>"categoryCode",
+            1=>"亚目编码",
+            2=>"categoryName",
+            3=>"亚目名"
+        );
+        $createModel->levelKey[]=array(
+            0=>"suborderCode",
+            1=>"细目编码",
+            2=>"suborderName",
+            3=>"细目名"
+        );
+        $createModel->levelKey[]=array(
+            0=>"sickname",
+            1=>"疾病名",
+            2=>"ICDCode",
+            3=>"ICD码",
+            4=>"attachCode",
+            5=>"附加码",
+        );
+        yii::$app->session->set("spilt_character",":");
+        var_dump($createModel->levelKey);
+        $createModel->testFun();
     }
     private static function test_input($data) {
         $data = trim($data);

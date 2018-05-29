@@ -8,14 +8,14 @@ $(document).ready(function () {
             {
                 $("#menu").append("<a href=\"#corpusManage\" class=\"list-group-item\" data-toggle=\"tab\" onclick=\"loadTab(this)\">"+data['authorities'][0]['authority_name']+"</a>\n" +
                     "<a href=\"#userManage\" class=\"list-group-item\" data-toggle=\"tab\">"+data['authorities'][1]['authority_name']+"</a>\n"+
-                "<a href='#corpusCheck' class=\"list-group-item\" data-toggle=\"tab\">"+data['authorities'][2]['authority_name']+"</a>");
+                "<a href='#corpusCheck' class=\"list-group-item\" onclick=\"loadTab(this)\" data-toggle=\"tab\">"+data['authorities'][2]['authority_name']+"</a>");
             }
             if(data['code']==2)
             {
                 for(var i=0;i<data['userAuthorities'].length;i++)
                 {
                     var res=getNameAndHerf(data['authorities'],data['userAuthorities'][i]);
-                    $("#menu").append("<a href=\""+res[0]+"\" class=\"list-group-item\" data-toggle=\"tab\">"+res[1]+"</a>\n");
+                    $("#menu").append("<a href=\""+res[0]+"\" class=\"list-group-item\" data-toggle=\"tab\" onclick=\"loadTab(this)\">"+res[1]+"</a>\n");
                 }
             }
             changeTab();

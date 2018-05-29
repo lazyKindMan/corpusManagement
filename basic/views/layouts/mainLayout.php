@@ -34,15 +34,6 @@ AppAsset::register($this);
             <div class="col-lg-3 col-md-3 col-sm-3 text-center" >
 
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-4">
-                <input type="text" name="search" placeholder="请输入搜索语料" class="form-control">
-            </div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
-                <button class="btn btn-danger ">搜索</button>
-            </div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
-                <button class="btn btn-info">进入高级搜索</button>
-            </div>
         </div>
     </div>
 </div>

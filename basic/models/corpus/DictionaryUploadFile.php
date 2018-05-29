@@ -75,6 +75,7 @@ class DictionaryUploadFile
         $handle=fopen($this->file_path,'r');
         $firstRow=fgets($handle);
         $firstRow=trim($firstRow);
+        $firstRow=trim($firstRow, "\xEF\xBB\xBF");
         if($firstRow!=null)
         {
             $key=[];
