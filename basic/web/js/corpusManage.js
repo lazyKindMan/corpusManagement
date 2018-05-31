@@ -134,6 +134,7 @@ function createForm(levelNum,keys) {
     //提交事件
     $("#CreateButton").click(function () {
         $(this).attr('disabled',"true");
+        $("#backPre").attr('disabled',"true");
         $('#warning1').text('正在处理，请稍等！');
         //获取语料库名称
         var corpusName=$("#corpusName").val();
@@ -158,7 +159,6 @@ function createForm(levelNum,keys) {
                 levelKey[levelNum].push($key);
                 levelKey[levelNum].push($alias);
         });
-        console.log(levelKey);
         $.post(
             "create-dic-corpus.html",
             {corpusName:corpusName,corpusPre:corpusPre,levelNames:levelNames,levelKey:levelKey},
@@ -168,22 +168,32 @@ function createForm(levelNum,keys) {
                 {
                     alert('添加成功，进入审核');
                     //关闭模态框并清除词典
-                    $("#addCorpusModal").modal("hide");
-                    $("#uploadCorpusForm").toggle();
-                    $("#createForm").toggle();
-                    $(".fileUpload").empty();
-                    var element="<label class=\"control-label col-lg-2\">语料文件上传</label>\n" +
-                        "            <div class=\"col-lg-8\">\n" +
-                        "                <input type=\"file\" name=\"upload_txt\" id=\"uploadFile\" class=\"file\">\n" +
-                        "            </div>";
-                    $(".fileUpload").append(element);
+                    // $("#addCorpusModal").modal("hide");
+                    // $("#uploadCorpusForm").toggle();
+                    // $("#createForm").toggle();
+                    // $(".fileUpload").empty();
+                    // var element="<label class=\"control-label col-lg-2\">语料文件上传</label>\n" +
+                    //     "            <div class=\"col-lg-8\">\n" +
+                    //     "                <input type=\"file\" name=\"upload_txt\" id=\"uploadFile\" class=\"file\">\n" +
+                    //     "            </div>";
+                    // $(".fileUpload").append(element);
+                    location.reload();
                 }
-                else alert(data);
-                $(this).attr('disabled',"false");
-                $('#warning1').text('');
-                window.reload();
+                else
+                {
+                    alert(data);
+                    $("#CreateButton").removeAttr("disabled");
+                    $("#backPre").removeAttr("disabled");
+                    $('#warning1').text('');
+                }
+                //重新加载管理界面
             },"json"
         );
         return false;
     })
+}
+function textCorporaManage() {
+    $("#dictionary_manage").toggle();
+    $("#text_manage").toggle();
+
 }

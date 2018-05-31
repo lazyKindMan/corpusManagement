@@ -101,7 +101,7 @@ header("Content-type: text/html; charset=utf-8");
           }
     ?>
     <?=\yii\helpers\Html::a("点击添加语料库","#addCorpusModal",['class'=>'col_lg-4 btn btn-success','onclick'=>'addCorpus()','data-toggle' => 'modal']);?>
-    <?=\yii\helpers\Html::a("管理文本语料","textCorpusManage.html",['class'=>'col_lg-4 btn btn-primary']);?>
+    <?=\yii\helpers\Html::a("管理文本语料","javascript:void(0)",['class'=>'col_lg-4 btn btn-primary','onclick'=>'textCorporaManage()']);?>
     <?php \yii\widgets\Pjax::end();?>
 
 </div>
@@ -158,5 +158,10 @@ use yii\helpers\Url;
     <div class="form-horizontal" id="createForm" style="display: none">
 
     </div>
+    <div id="text_manage"></div>
 <?php
 \yii\bootstrap\Modal::end()?>
+</div>
+<div id="text_manage">
+
+</div>

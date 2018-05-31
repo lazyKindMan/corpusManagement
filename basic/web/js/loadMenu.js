@@ -44,7 +44,6 @@ $(document).ready(function () {
                     'level_name':$("#userMessage .level").text()
                 },
                 function (data) {
-                    console.log(data);
                     if(data==1)
                     {
                         alert("修改成功")
@@ -69,11 +68,8 @@ $(document).ready(function () {
 function getNameAndHerf(authorities,id) {
     //获取authority_name
     var i=0;
-    console.log(authorities);
     for(var j=0;j<authorities.length;j++)
     {
-        console.log(authorities[j]['authority_id']);
-        console.log(id);
         if(authorities[j]['authority_id']==id)
         {
             break;

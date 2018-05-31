@@ -7,6 +7,7 @@
  */
 
 namespace app\models\corpus;
+use app\models\check\CheckService;
 use app\models\Userlevel;
 use Yii;
 use yii\db\Exception;
@@ -89,12 +90,15 @@ class createDictionarnForm
             $idc=(int)$db->getLastInsertID();
             $this->_addRelation($db,$idc);
             $this->_insertData();
+            $checkMode=new CheckService();
+            $corpus_id=CorporaDictionary::findCorpusId($this->corpusName);
+            $checkMode->distributeCheckers($corpus_id,CheckService::KINDDICTIONARY,CheckService::OPADD);
             $insertCorpusTransaction->commit();
         }
         catch (\Exception $e)
         {
             $insertCorpusTransaction->rollBack();
-            var_dump($e->getMessage());
+            throw $e;
             return false;
         }
         catch (\Throwable $e)

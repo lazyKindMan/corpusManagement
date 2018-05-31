@@ -8,6 +8,7 @@
 
 namespace app\controllers;
 use app\models\Authority;
+use app\models\check\CheckService;
 use app\models\corpus\CorporaDictionary;
 use app\models\corpus\CorporaDictionaryQuery;
 use app\models\corpus\createDictionarnForm;
@@ -20,6 +21,7 @@ use app\models\MyUser;
 use app\models\MyUserSearch;
 use yii\web\Controller;
 use yii\data\ActiveDataProvider;
+use app\models\check\CorporaCheckModel;
 class AdminController extends Controller
 {
     public $layout='mainLayout';
@@ -306,43 +308,82 @@ class AdminController extends Controller
         }
 
     }
+
+    /**
+     * ajax获得审核信息及分页查询信息
+     * @return string
+     */
     public function actionCorpusCheck()
     {
         if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
             return "0";
         if(!MyUser::checkCurrrentUserManageUser(yii::$app->request->get('authority_name')))
             return "0";
-        return $this->renderAjax("corpusCheck");
+        $currentPage=yii::$app->request->get('currentPage')?(int)yii::$app->request->get('currentPage'):0;
+        $pageSize=3;
+        $checkModel=new CheckService();
+        try {
+            $datasArr=$checkModel->getCheckMessage(['pageSize'=>$pageSize,'offSet'=>($currentPage-1)*$pageSize]);
+            $datasArr['pageSize']=$pageSize;
+            return json_encode($datasArr);
+        } catch (yii\db\Exception $e) {
+            return json_encode(["code"=>0,"message"=>$e->getMessage()]);
+        }
+    }
+
+    /**
+     *显示语料库报表
+     */
+    public function showCorpusDetail()
+    {
+        //验证用户身份
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+           return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理")||!MyUser::checkCurrrentUserManageUser("语料审核"));
+            return json_encode(0);
+
     }
     //测试页面
+
+    /**
+     * @throws \Exception
+     */
     public function actionTest()
     {
-        $createModel=new createDictionarnForm();
-        $createModel->corpusName="ICD字典";
-        $createModel->levelKey=array();
-        $createModel->levelKey[]=array(
-            0=>"categoryCode",
-            1=>"亚目编码",
-            2=>"categoryName",
-            3=>"亚目名"
-        );
-        $createModel->levelKey[]=array(
-            0=>"suborderCode",
-            1=>"细目编码",
-            2=>"suborderName",
-            3=>"细目名"
-        );
-        $createModel->levelKey[]=array(
-            0=>"sickname",
-            1=>"疾病名",
-            2=>"ICDCode",
-            3=>"ICD码",
-            4=>"attachCode",
-            5=>"附加码",
-        );
-        yii::$app->session->set("spilt_character",":");
-        var_dump($createModel->levelKey);
-        $createModel->testFun();
+//        $createModel=new createDictionarnForm();
+//        $createModel->corpusName="ICD字典";
+//        $createModel->levelKey=array();
+//        $createModel->levelKey[]=array(
+//            0=>"categoryCode",
+//            1=>"亚目编码",
+//            2=>"categoryName",
+//            3=>"亚目名"
+//        );
+//        $createModel->levelKey[]=array(
+//            0=>"suborderCode",
+//            1=>"细目编码",
+//            2=>"suborderName",
+//            3=>"细目名"
+//        );
+//        $createModel->levelKey[]=array(
+//            0=>"sickname",
+//            1=>"疾病名",
+//            2=>"ICDCode",
+//            3=>"ICD码",
+//            4=>"attachCode",
+//            5=>"附加码",
+//        );
+//        yii::$app->session->set("spilt_character",":");
+//        var_dump($createModel->levelKey);
+//        $createModel->testFun();
+        //语料审核模块测试
+//        $checkModel=new CheckService();
+//        try {
+//            $checkModel->distributeCheckers(8, CheckService::KINDDICTIONARY, CheckService::OPADD);
+//        }catch (\Exception $e)
+//        {
+//            echo $e->getMessage()." in ".$e->getFile()." ".$e->getLine();
+//        }
     }
     private static function test_input($data) {
         $data = trim($data);
@@ -350,4 +391,5 @@ class AdminController extends Controller
         $data = htmlspecialchars($data);
         return $data;
     }
+
 }

@@ -198,7 +198,49 @@ $this->registerJsFile('@web/js/corpusManage.js?'.$code,["depends"=>["app\assets\
 
             </div>
             <div id="corpusCheck" style="display: none" class="tab">
+                <div id="dictionaryCheck">
+                    <h3>词典语料审核</h3>
+                    <div class="hr-div"><hr></div>
+                    <table class="table table-striped" id="dictionaryCheckTable">
+                        <thead>
+                            <tr>
+                                <th>语料库名称</th>
+                                <th>创建时间</th>
+                                <th>上次更新时间</th>
+                                <th>审核的操作</th>
+                                <th>        </th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
+                        </tbody>
+                    </table>
+                    <ul class="pagination">
+                        <li><a href="#">&laquo</a></li>
+                        <li><a href="#">&raquo;</a></li>
+                    </ul>
+                </div>
+                <div id="textCheck">
+                    <h3>文本语料审核</h3>
+                    <div class="hr-div"><hr></div>
+                    <table class="table table-striped" id="textCheckTable">
+                        <thead>
+                        <tr>
+                            <th>语料库名称</th>
+                            <th>创建时间</th>
+                            <th>上次更新时间</th>
+                            <th>审核的操作</th>
+                            <th>        </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                    <ul class="pagination">
+
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
