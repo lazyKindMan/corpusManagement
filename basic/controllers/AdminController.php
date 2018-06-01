@@ -13,6 +13,7 @@ use app\models\corpus\CorporaDictionary;
 use app\models\corpus\CorporaDictionaryQuery;
 use app\models\corpus\createDictionarnForm;
 use app\models\corpus\DictionaryUploadFile;
+use app\models\corpus\TextCorpora;
 use app\models\UserAthu;
 use app\models\users\updateUserForm;
 use yii;
@@ -350,40 +351,10 @@ class AdminController extends Controller
      */
     public function actionTest()
     {
-//        $createModel=new createDictionarnForm();
-//        $createModel->corpusName="ICD字典";
-//        $createModel->levelKey=array();
-//        $createModel->levelKey[]=array(
-//            0=>"categoryCode",
-//            1=>"亚目编码",
-//            2=>"categoryName",
-//            3=>"亚目名"
-//        );
-//        $createModel->levelKey[]=array(
-//            0=>"suborderCode",
-//            1=>"细目编码",
-//            2=>"suborderName",
-//            3=>"细目名"
-//        );
-//        $createModel->levelKey[]=array(
-//            0=>"sickname",
-//            1=>"疾病名",
-//            2=>"ICDCode",
-//            3=>"ICD码",
-//            4=>"attachCode",
-//            5=>"附加码",
-//        );
-//        yii::$app->session->set("spilt_character",":");
-//        var_dump($createModel->levelKey);
-//        $createModel->testFun();
-        //语料审核模块测试
-//        $checkModel=new CheckService();
-//        try {
-//            $checkModel->distributeCheckers(8, CheckService::KINDDICTIONARY, CheckService::OPADD);
-//        }catch (\Exception $e)
-//        {
-//            echo $e->getMessage()." in ".$e->getFile()." ".$e->getLine();
-//        }
+        $model=new TextCorpora(['filePath'=>"G:/wamp64/www/basic/crawler/peopleNewsparper-199801.txt"]);
+        $model->getConetnt();
+        echo $model->ridContent;
+        var_dump($model->wordArr);
     }
     private static function test_input($data) {
         $data = trim($data);
