@@ -14,6 +14,9 @@ use app\models\corpus\CorporaDictionaryQuery;
 use app\models\corpus\createDictionarnForm;
 use app\models\corpus\DictionaryUploadFile;
 use app\models\corpus\TextCorpora;
+use app\models\corpus\TextCorporaSearch;
+use app\models\corpus\TextCorpusReport;
+use app\models\TableConfig;
 use app\models\UserAthu;
 use app\models\users\updateUserForm;
 use yii;
@@ -340,9 +343,74 @@ class AdminController extends Controller
         //验证用户身份
         if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
            return json_encode(0);
-        if(!MyUser::checkCurrrentUserManageUser("语料库管理")||!MyUser::checkCurrrentUserManageUser("语料审核"));
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理")||!MyUser::checkCurrrentUserManageUser("语料审核"))
             return json_encode(0);
 
+    }
+    /*
+     * ajax返回文本语料库信息信息
+     */
+    public function actionShowTextCorpora()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理"))
+            return json_encode(0);
+        $pageSize=8;
+        $offSet=yii::$app->request->get('offSet')?(int)yii::$app->request->get('offSet')-1:0;
+        $condition=yii::$app->request->get('condition')?(int)yii::$app->request->get('condition'):[];
+        $flag=1;
+        $conditionArr=[];
+        //生成条件数组(从一维数组转换为二维数组)
+        foreach ($condition as $key=>$value)
+        {
+            if($flag%2==0)
+                $conditionArr[$condition[$key-1]]=$value;
+            $flag++;
+        }
+        try
+        {
+            $model=new TextCorporaSearch(['pageSize'=>$pageSize,'offSet'=>$offSet,'condition'=>$conditionArr]);
+            $res=[
+                'code'=>1,
+                'pageSize'=>$pageSize,
+                'allSum'=>$model->totalCount,
+                'dataArr'=>$model->getTextCorpora()
+            ];
+        }catch (\Exception $e)
+        {
+            $res=[
+              'code'=>0,
+              'message'=>$e->getMessage()."<br> ".$e->getFile()."<br> ".$e->getFile()."<br>".$e->getTraceAsString(),
+            ];
+        }
+        return json_encode($res);
+    }
+    public function actionCorpusReport()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理")||!MyUser::checkCurrrentUserManageUser("语料审核"))
+            return json_encode(0);
+        $corpus_id=yii::$app->request->get("corpus_id")?(int)yii::$app->request->get("corpus_id"):0;
+        if($corpus_id)
+        {
+            $model=new TextCorpusReport($corpus_id);
+            try{
+                $model->getReport();
+                return json_encode([
+                    'code'=>1,
+                    'report'=>$model->dataArr,
+                    'corpusData'=>$model->getCorpusData()
+                ]);
+            }catch (\Exception $e)
+            {
+                return json_encode([
+                    'code'=>0,
+                    'message'=>$e->getMessage()
+                ]);
+            }
+        }
     }
     //测试页面
 
@@ -351,10 +419,26 @@ class AdminController extends Controller
      */
     public function actionTest()
     {
-        $model=new TextCorpora(['filePath'=>"G:/wamp64/www/basic/crawler/peopleNewsparper-199801.txt"]);
-        $model->getConetnt();
-        echo $model->ridContent;
-        var_dump($model->wordArr);
+//        ini_set('memory_limit', '4096M');
+//        $model=new TextCorpora(['filePath'=>"G:/wamp64/www/basic/crawler/peopleNewsparper-199801.txt",
+//            'title'=>'人民日报98年1月',
+//            'resource'=>'人民日报',
+//            'corpus_name'=>"人民日报语料",
+//            'tableName'=>'tb_corpora_text'
+//            ]);
+//        $model->getConetntFile();
+//        $model=new TextCorpusReport(7);
+//        try{
+//            $model->getReport();
+//            var_dump($model->dataArr);
+//        }catch (\Exception $e)
+//        {
+//            echo $e->getMessage();
+//        }
+        for ($i=4004;$i<4364;$i++)
+        {
+            yii::$app->db->createCommand()->update("tb_wordlist",['corpus_id'=>14],['id'=>$i])->execute();
+        }
     }
     private static function test_input($data) {
         $data = trim($data);

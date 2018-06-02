@@ -167,16 +167,6 @@ function createForm(levelNum,keys) {
                 if(data==1)
                 {
                     alert('添加成功，进入审核');
-                    //关闭模态框并清除词典
-                    // $("#addCorpusModal").modal("hide");
-                    // $("#uploadCorpusForm").toggle();
-                    // $("#createForm").toggle();
-                    // $(".fileUpload").empty();
-                    // var element="<label class=\"control-label col-lg-2\">语料文件上传</label>\n" +
-                    //     "            <div class=\"col-lg-8\">\n" +
-                    //     "                <input type=\"file\" name=\"upload_txt\" id=\"uploadFile\" class=\"file\">\n" +
-                    //     "            </div>";
-                    // $(".fileUpload").append(element);
                     location.reload();
                 }
                 else
@@ -195,5 +185,134 @@ function createForm(levelNum,keys) {
 function textCorporaManage() {
     $("#dictionary_manage").toggle();
     $("#text_manage").toggle();
+    $.get(
+        "show-text-corpora.html",
+        {},
+        function (data) {
+            if(data['code']==1)
+            {
+                addConetent(data['dataArr']);
+                createTextCorporaPage(data['allSum'],data['pageSize']);
+            }
+            if(data['code']==0)
+            {
+                alert(data['message']);
+            }
+        },"json"
+    );
+}
+function addConetent(datas) {
+    var $tableBody=$("#text_manage").find("#textCorporaTable").find("tbody");
+    $tableBody.html("");
+    if(datas.length>0)
+    {
+        datas.forEach(function (item) {
+            var content="<tr data-corpus_id=:corpus_id>\n" +
+                "                <td>:corpus_name</td>\n" +
+                "                <td>:created_at</td>\n" +
+                "                <td>:resource</td>\n" +
+                "                <td>:title</td>\n" +
+                "                <td>:word_count</td>"+
+                "                <td>:word_kind_count</td>"+
+                "                <td>:level_name</td>\n" +
+                "                <td>"+
+                "                    <button class=\"btn btn-success\" onclick=\"showTextCorpusDetail(this,:corpus_id)\">语料详情</button>\n" +
+                "                    <button class=\"btn btn-danger\" onclick=\"deleteTextCorpus(this,:corpus_id)\">删除语料</button>\n" +
+                "                </td>\n" +
+                "            </tr>";
+            content=content.format(item);
+            $tableBody.append(content);
+        });
+    }
+    else
+    {
+        $tableBody.append("<h3>目前系统没有改类语料</h3>");
+    }
+}
+//显示语料报表事件
+function showTextCorpusDetail(obj,coprus_id) {
+    $("#corpusDetail").modal("show");
+    $.get(
+        "corpus-report.html",
+        {'corpus_id':coprus_id},
+        function (data) {
+            if(data['code']==1)
+            {
+                console.log(data);
+            }
+            if(data['code']==0)
+            {
+                alert(data['message']);
+            }
+        },"json"
+    );
+}
+function deleteTextCorpus(obj,corpus_id) {
 
+}
+function createTextCorporaPage(sum,pageSize,currentPage=1) {
+    var $addElement=$("#text_manage").find("#currentPage");
+    if(sum%pageSize!=0)
+    {
+        var pages=parseInt(sum/pageSize+1);
+    }
+    else
+    {
+        var pages=parseInt(sum/pageSize);
+        if(pages==0) pages++;
+    }
+    //创建缩略版翻页
+    $addElement.text("");
+    $addElement.text(currentPage+"/"+pages);
+    $("#text_manage").find("ul li").removeClass("disabled");
+    if(currentPage==pages)
+    {
+        $("#text_manage").find("ul li:last").prev().addClass("disabled");
+    }
+    if(currentPage==1)
+    {
+        $("#text_manage").find("ul li:first").next().addClass("disabled");
+    }
+}
+function jumpPage(obj) {
+    var jumpPage=parseInt($("#jumpPage").val());
+    var pages=parseInt($("#currentPage").text().split("/")[1]);
+    if(jumpPage>pages)
+        alert("请输入不大于"+pages+"的页数");
+    else {
+        getPageData(jumpPage);
+    }
+}
+function clickJumpPage(obj,flag) {
+    var currentPage=parseInt($("#currentPage").text().split("/")[0]);
+    var pages=parseInt($("#currentPage").text().split("/")[1]);
+    switch (flag)
+    {
+        case 1:getPageData(1);break;
+        case 2:getPageData(currentPage-1);break;
+        case 3:getPageData(currentPage+1);break;
+        case 4:getPageData(pages);break;
+    }
+}
+function getPageData(jumpPage) {
+    $.get(
+        "show-text-corpora.html",
+        {'offSet':jumpPage},
+        function (data) {
+            console.log(data);
+            if(data['code']==1)
+            {
+                addConetent(data['dataArr']);
+                createTextCorporaPage(data['allSum'],data['pageSize'],jumpPage);
+            }
+            if(data['code']==0)
+            {
+                alert(data['message']);
+            }
+        },"json"
+    )
+}
+function backDictionaryManage() {
+    $("#dictionary_manage").toggle();
+    $("#text_manage").toggle();
 }

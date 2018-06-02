@@ -158,10 +158,56 @@ use yii\helpers\Url;
     <div class="form-horizontal" id="createForm" style="display: none">
 
     </div>
-    <div id="text_manage"></div>
 <?php
 \yii\bootstrap\Modal::end()?>
 </div>
-<div id="text_manage">
+<div id="text_manage" style="display: none">
+    <table class="table table-striped" id="textCorporaTable">
+        <thead>
+        <tr>
+            <th>语料库名称</th>
+            <th>创建时间</th>
+            <th>语料来源</th>
+            <th>标题</th>
+            <th>词语数</th>
+            <th>词类数</th>
+            <th>开放等级</th>
+        </tr>
+        </thead>
+        <tbody>
 
+        </tbody>
+    </table>
+    <div>
+        <ul class="pagination col-lg-6 col-sm-6 col-md-6">
+            <li><a href="javascript:void(0)" onclick="clickJumpPage(this,1)">首页</a></li>
+            <li class="previous"><a href="javascript:void(0)" onclick="clickJumpPage(this,2)">前一页</a></li>
+            <li class="next"><a href="javascript:void(0)" onclick="clickJumpPage(this,3)">后一页</a></li>
+            <li><a href="javascript:void(0)" onclick="clickJumpPage(this,4)">末页</a></li>
+        </ul>
+    </div>
+    <div style="margin: 30px 0px;">
+        <label class="col-lg-1 col-md-1 col-sm-1" style="padding: 12px 0px">当前页:</label>
+        <label class="currentPage col-lg-1 col-md-1 col-sm-1" style="padding: 12px 0px" id="currentPage"></label>
+        <label class="col-lg-1 col-md-1 col-sm-1" style="padding: 12px 0px">跳转至:</label>
+        <div class="col-lg-1 col-md-1 col-sm-1">
+            <input class="form-control" id="jumpPage" style="margin:10px 0px;padding: 0px;height:30px" size="2">
+        </div>
+        <button class="btn btn-primary" style="margin:10px 0px" onclick="jumpPage(this)">跳转</button>
+    </div>
+    <div>
+        <button class="btn btn-info" onclick="backDictionaryManage()">词典语料管理</button>
+    </div>
+</div>
+<!--文本语料统计详情模态框-->
+<div class="modal fade" id="corpusDetail">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
 </div>
