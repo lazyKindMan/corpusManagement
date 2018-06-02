@@ -156,6 +156,7 @@ function changeTab() {
         $("#myTab .tab").fadeOut(100);
         $("#menu a").removeClass('active');
         $(href).fadeIn(100);
+        $("#corpusDetail").hide();
         $(this).addClass("active");
     });
 }

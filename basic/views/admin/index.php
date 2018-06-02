@@ -242,6 +242,48 @@ $this->registerJsFile('@web/js/corpusManage.js?'.$code,["depends"=>["app\assets\
                     </ul>
                 </div>
             </div>
+            <div id="corpusDetail" style="display: none">
+                <div class="col-md-6 col-lg-6 col-sm-6">
+                    <div>
+                        <label style="font-size: large">语料库名:</label>
+                        <label style="font-size: large" id="textCorpusName"></label>
+                    </div>
+                    <div>
+                        <label style="font-size: large">语料来源:</label>
+                        <label style="font-size: large" id="textCorpusSource"></label>
+                    </div>
+                    <div>
+                        <label style="font-size: large">词数:</label>
+                        <label style="font-size: large" id="textWordCount"></label>
+                    </div>
+                    <div>
+                        <label style="font-size: large">词类数:</label>
+                        <label style="font-size: large" id="textWordKind"></label>
+                    </div>
+                    <div>
+                        <label style="font-size: large">创建时间:</label>
+                        <label style="font-size: large" id="textCreatedAt"></label>
+                    </div>
+                    <div>
+                        <label style="font-size: large">语料内容:</label>
+                        <textarea class="form-control" id="textContent" readonly="readonly" rows="10"></textarea>
+                    </div>
+                    <div style="margin-top: 30px">
+                        <label style="font-size: large;padding-left: 0px" class="col-md-3 col-lg-3 col-sm-3">开放等级:</label>
+                        <div class="col-md-6 col-lg-6 col-sm-6">
+                            <select id="textOpenLevel" class="form-control">
+                                <option value="2">管理员</option>
+                                <option value="3">普通用户</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-sm-6">
+                    <div id="chartdiv" style="height:500px;width: 400px" class="center-block"></div>
+                </div>
+                <div class="hr-div"> <hr /></div>
+                <button class="btn btn-primary" onclick="backList()">返回列表</button>
+            </div>
         </div>
     </div>
             <div class="col-lg-3 col-md-3 col-sm-3">

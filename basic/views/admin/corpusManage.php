@@ -200,14 +200,4 @@ use yii\helpers\Url;
     </div>
 </div>
 <!--文本语料统计详情模态框-->
-<div class="modal fade" id="corpusDetail">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header"></div>
-            <div class="modal-body"></div>
-            <div class="modal-footer">
-                <button class="btn btn-default" data-dismiss="modal">关闭</button>
-            </div>
-        </div>
-    </div>
-</div>
+<!--<div id="chartdiv" style="height:500px;width: 400px"></div>-->

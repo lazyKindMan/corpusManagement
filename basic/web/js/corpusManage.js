@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    //监听表单提交
+
 });
 function upload(obj) {
         var $form=document.getElementById('uploadCorpusForm');//不能为jquery对象
@@ -231,14 +231,56 @@ function addConetent(datas) {
 }
 //显示语料报表事件
 function showTextCorpusDetail(obj,coprus_id) {
-    $("#corpusDetail").modal("show");
+    $("#corpusDetail").toggle();
+    $("#text_manage").toggle();
     $.get(
         "corpus-report.html",
         {'corpus_id':coprus_id},
         function (data) {
             if(data['code']==1)
             {
-                console.log(data);
+                var showData=[];
+                var i=0;
+                var count=0;
+                for(var key in data['report'])
+                {
+                    showData.push([key,parseInt(data['report'][key])]);
+                    count+=parseInt(data['report'][key]);
+                    i++;
+                    if(i>=5)
+                        break;
+                }
+                showData.push(['其他词',parseInt(data['corpusData']['word_count'])-count]);
+                $("#chartdiv").html("");
+                $.jqplot('chartdiv', [showData], {
+                    title:"前五词频统计分布图",
+                    seriesDefaults: {
+                        renderer: $.jqplot.PieRenderer,
+                        rendererOptions: {
+                            showDataLabels: true,
+                            lineWidth:5,
+                            shadowDepth: 5,     // 设置阴影区域的深度
+                            shadowAlpha: 0.07   // 设置阴影区域的透明度
+                        }
+                    },
+                    legend: {
+                        show: true,
+                        location: "e"
+                    },
+                    cursor: {
+                        style: 'crosshair', //当鼠标移动到图片上时，鼠标的显示样式，该属性值为css类
+                        show: true, //是否显示光标
+                        showTooltip: true, // 是否显示提示信息栏
+                        followMouse: false, //光标的提示信息栏是否随光标（鼠标）一起移动
+                        }
+                });
+                $("#textCorpusName").text(data['corpusData']['corpus_name']);
+                $("#textCorpusSource").text(data['corpusData']['resource']);
+                $("#textWordCount").text(data['corpusData']['word_count']);
+                $("#textWordKind").text(data['corpusData']['word_kind_count']);
+                $("#textCreatedAt").text(data['corpusData']['created_at']);
+                $("#textOpenLevel").val(data['corpusData']['open_level']);
+                $("#textContent").val(data['corpusData']['content']);
             }
             if(data['code']==0)
             {
@@ -314,5 +356,9 @@ function getPageData(jumpPage) {
 }
 function backDictionaryManage() {
     $("#dictionary_manage").toggle();
+    $("#text_manage").toggle();
+}
+function backList() {
+    $("#corpusDetail").toggle();
     $("#text_manage").toggle();
 }
