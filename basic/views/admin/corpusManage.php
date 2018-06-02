@@ -197,7 +197,50 @@ use yii\helpers\Url;
     </div>
     <div>
         <button class="btn btn-info" onclick="backDictionaryManage()">词典语料管理</button>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#addTextCorpusModal">添加文本语料</button>
     </div>
 </div>
 <!--文本语料统计详情模态框-->
 <!--<div id="chartdiv" style="height:500px;width: 400px"></div>-->
+<div class="modal fade" id="addTextCorpusModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>文本语料添加</h5></div>
+            <div class="modal-body">
+                <form id="addTextCorpusForm">
+                    <div class="form-group">
+                        <label class="control-label">语料标题:</label>
+                        <div >
+                            <input type="text" class="form-control"  name="title">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">语料来源:</label>
+                        <div>
+                            <input type="text" class="form-control"  name="resource">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">语料库名称:</label>
+                        <div>
+                            <input type="text" class="form-control"  name="corpus_name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">带标记语料内容:</label>
+                        <div>
+                            <textarea class="form-control" rows="15" name="content">
+
+                            </textarea>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="addTextCorpus()">提交</button>
+                <button class="btn btn-danger" data-dismiss="modal">关闭</button>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>

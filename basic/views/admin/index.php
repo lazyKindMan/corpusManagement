@@ -265,6 +265,10 @@ $this->registerJsFile('@web/js/corpusManage.js?'.$code,["depends"=>["app\assets\
                         <label style="font-size: large" id="textCreatedAt"></label>
                     </div>
                     <div>
+                        <label style="font-size: large">审核状态:</label>
+                        <label style="font-size: large" id="textCheckStatus"></label>
+                    </div>
+                    <div>
                         <label style="font-size: large">语料内容:</label>
                         <textarea class="form-control" id="textContent" readonly="readonly" rows="10"></textarea>
                     </div>

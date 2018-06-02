@@ -281,6 +281,9 @@ function showTextCorpusDetail(obj,coprus_id) {
                 $("#textCreatedAt").text(data['corpusData']['created_at']);
                 $("#textOpenLevel").val(data['corpusData']['open_level']);
                 $("#textContent").val(data['corpusData']['content']);
+                if(data['corpusData']['is_checking']==0)
+                    $("#textCheckStatus").text("正常");
+                else $("#textCheckStatus").text("正在审核");
             }
             if(data['code']==0)
             {
@@ -361,4 +364,24 @@ function backDictionaryManage() {
 function backList() {
     $("#corpusDetail").toggle();
     $("#text_manage").toggle();
+}
+//提交语料信息
+function addTextCorpus() {
+    var $inputs=$("#addTextCorpusForm").find("input");
+    var dataArr={};
+    $inputs.each(function () {
+        dataArr[$(this).attr("name")]=$(this).val();
+    });
+    dataArr[$("#addTextCorpusForm").find("textarea").attr("name")]=$("#addTextCorpusForm").find("textarea").val();
+    console.log(dataArr);
+    $.ajax({
+        url:"add-text-corpus.html",
+        type:"POST",
+        dataType:'json',
+        data:dataArr,
+        cache:false,
+        success:function (data) {
+
+        }
+    });
 }

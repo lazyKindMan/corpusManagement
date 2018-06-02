@@ -412,6 +412,23 @@ class AdminController extends Controller
             }
         }
     }
+    public function actionAddTextCorpus()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理"))
+            return json_encode(0);
+        if(yii::$app->request->isPost)
+        {
+            try {
+                $model=new TextCorpora(yii::$app->request->post());
+                var_dump($model);
+            }catch (\Exception $e)
+            {
+
+            }
+        }
+    }
     //测试页面
 
     /**

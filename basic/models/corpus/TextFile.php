@@ -38,6 +38,7 @@ class TextFile
     }
     public function closeFile()
     {
-        fclose($this->_file);
+        if($this->_file)
+            fclose($this->_file);
     }
 }

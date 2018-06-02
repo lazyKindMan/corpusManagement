@@ -8,6 +8,7 @@
 
 namespace app\models\corpus;
 use app\models\check\CheckService;
+use app\models\TableConfig;
 use yii;
 use app\models\Userlevel;
 //文本语料业务处理和数据存储
@@ -29,7 +30,8 @@ class TextCorpora
     private $_corpusName;
     public function __construct($config=[])
     {
-        $this->content=null;
+        $this->content="";
+        $this->_tableName=TableConfig::TextCorporaTable;
         foreach ($config as $key=>$value)
         {
             switch ($key)
@@ -43,7 +45,7 @@ class TextCorpora
                 case 'corpus_name':$this->_corpusName=$value;break;
             }
         }
-        if($this->content===null)
+        if($this->content=="")
         {
             $this->fileClass=new TextFile($this->filePath);
             $this->content='';
@@ -53,7 +55,8 @@ class TextCorpora
     public function __destruct()
     {
         // TODO: Implement __destruct() method.
-        $this->fileClass->closeFile();
+        if($this->fileClass!=null)
+            $this->fileClass->closeFile();
     }
 
     /**
