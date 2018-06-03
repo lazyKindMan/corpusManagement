@@ -31,9 +31,15 @@ function loadCheckManage(authority_name) {
 }
 function createCheckTable(datas,kind) {
     if(kind=='dictionary')
+    {
         var $tableBody=$("#dictionaryCheckTable").find("tbody");
+        buttonE="<button class=\"showDetail btn btn-primary\">查看详情</button>";
+    }
     else if(kind=='text')
+    {
         var $tableBody=$("#textCheckTable").find("tbody");
+        buttonE="<button class=\"showDetail btn btn-primary\" onclick=\"showTextCorpusDetail(this,:corpus_id,2)\">查看详情</button>";
+    }
     $tableBody.html("");
     if(datas.length>0)
     {
@@ -50,10 +56,9 @@ function createCheckTable(datas,kind) {
                 "                                <td>:created_at</td>" +
                 "                                <td>:updated_at</td>" +
                 "                                <td>:OpName</td>" +
-                "                                <td>" +
-                "                                    <button class=\"showDetail btn btn-primary\" onclick=\"showCorpusDetail(obj,:corpus_id)\">查看详情</button>" +
-                "                                    <button class=\"passCheck btn btn-success\" onclick='check(obj,:corpus_id,:kind,1)'>审核通过</button>" +
-                "                                <button class=\"unpassCheck btn btn-danger\" onclick='check(obj,:corpus_id,:kind,0)'>审核不通过</button>" +
+                "                                <td>" +buttonE+
+                "                                    <button class=\"passCheck btn btn-success\" onclick='check(this,:corpus_id,:kind,1)'>审核通过</button>" +
+                "                                <button class=\"unpassCheck btn btn-danger\" onclick='check(this,:corpus_id,:kind,0)'>审核不通过</button>" +
                 "                                </td>" +
                 "                            </tr>";
             var content=content.format(item);
@@ -125,5 +130,100 @@ function changePage(obj,page,kind,lastPage) {
 }
 //审核通过或不通过操作
 function check(obj,coprus_id,kind,op) {
-    
+    if(op==1)
+    {
+        if(confirm("你确定批准该操作审核?"))
+        {
+            $.post(
+                "pass-check.html",
+                {'corpus_id':coprus_id,'kind':kind},
+                function (data) {
+                    if(data['code']==1)
+                    {
+                        alert(data['message']);
+                        $(obj).attr("disabled",'true');
+                        $(obj).next().attr("disabled",'true');
+                    }
+                    else
+                        alert(data['message']);
+                },"json"
+            )
+        }
+    }
+}
+function showTextCorpusDetail(obj,coprus_id,from) {
+    $("#corpusDetail").toggle();
+    if(from==1)
+    {
+        $("#text_manage").toggle();
+        $("#textOpenLevel").removeAttr("disabled");
+        $("#corpusDetail").find(".btnList").html("");
+        $("#corpusDetail").find(".btnList").append("<button class=\"btn btn-primary\" onclick=\"backList(1)\">返回列表</button>");
+    }
+    else if(from==2)
+    {
+        $("#corpusCheck").toggle();
+        $("#textOpenLevel").attr("disabled","true");
+        $("#corpusDetail").find(".btnList").html("");
+        $("#corpusDetail").find(".btnList").append("<button class=\"btn btn-primary\" onclick=\"backList(2)\">返回列表</button>");
+    }
+    $.get(
+        "corpus-report.html",
+        {'corpus_id':coprus_id},
+        function (data) {
+            console.log(data);
+            if(data['code']==1)
+            {
+                var showData=[];
+                var i=0;
+                var count=0;
+                for(var key in data['report'])
+                {
+                    showData.push([key,parseInt(data['report'][key])]);
+                    count+=parseInt(data['report'][key]);
+                    i++;
+                    if(i>=5)
+                        break;
+                }
+                showData.push(['其他词',parseInt(data['corpusData']['word_count'])-count]);
+                $("#chartdiv").html("");
+                $.jqplot('chartdiv', [showData], {
+                    title:"前五词频统计分布图",
+                    seriesDefaults: {
+                        renderer: $.jqplot.PieRenderer,
+                        rendererOptions: {
+                            showDataLabels: true,
+                            lineWidth:5,
+                            shadowDepth: 5,     // 设置阴影区域的深度
+                            shadowAlpha: 0.07   // 设置阴影区域的透明度
+                        }
+                    },
+                    legend: {
+                        show: true,
+                        location: "e"
+                    },
+                    cursor: {
+                        style: 'crosshair', //当鼠标移动到图片上时，鼠标的显示样式，该属性值为css类
+                        show: true, //是否显示光标
+                        showTooltip: true, // 是否显示提示信息栏
+                        followMouse: false, //光标的提示信息栏是否随光标（鼠标）一起移动
+                    }
+                });
+                $("#textCorpusName").text(data['corpusData']['corpus_name']);
+                $("#textCorpusSource").text(data['corpusData']['resource']);
+                $("#textWordCount").text(data['corpusData']['word_count']);
+                $("#textWordKind").text(data['corpusData']['word_kind_count']);
+                $("#textCreatedAt").text(data['corpusData']['created_at']);
+                $("#textOpenLevel").val(data['corpusData']['open_level']);
+                $("#textContent").val(data['corpusData']['content']);
+                if(data['corpusData']['is_checking']==0)
+                    $("#textCheckStatus").text("正常");
+                else $("#textCheckStatus").text("正在审核");
+            }
+            if(data['code']==0)
+            {
+                alert(data['message']);
+            }
+        },"json"
+    );
 }

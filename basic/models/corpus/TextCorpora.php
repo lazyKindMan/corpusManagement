@@ -263,14 +263,14 @@ class TextCorpora
      */
     public function deleteById()
     {
-        //先删词表和报告表
+
         $wordTable=TableConfig::TextWordTable;
         $reportTable=TableConfig::TextStatisticalTable;
         $db=yii::$app->db;
         if($this->corpus_id==null)
             throw new \Exception("no corpus_id in TextCorpora Class");
         $deleteTransaction=$db->beginTransaction();
-        try{
+        try{  //先删词表和报告表
             $db->createCommand()->delete($wordTable,['corpus_id'=>$this->corpus_id])->execute();
             $db->createCommand()->delete($reportTable,['corpus_id'=>$this->corpus_id])->execute();
             $db->createCommand()->delete($this->_tableName,['corpus_id'=>$this->corpus_id])->execute();

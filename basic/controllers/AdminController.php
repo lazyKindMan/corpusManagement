@@ -390,7 +390,7 @@ class AdminController extends Controller
     {
         if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
             return json_encode(0);
-        if(!MyUser::checkCurrrentUserManageUser("语料库管理")||!MyUser::checkCurrrentUserManageUser("语料审核"))
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理")&&!MyUser::checkCurrrentUserManageUser("语料审核"))
             return json_encode(0);
         $corpus_id=yii::$app->request->get("corpus_id")?(int)yii::$app->request->get("corpus_id"):0;
         if($corpus_id)
@@ -461,6 +461,23 @@ class AdminController extends Controller
                 'message'=>$e->getMessage()
             ]);
 //            return json_encode(var_dump(yii::$app->request->get()));
+        }
+    }
+    public function actionPassCheck()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料审核"))
+            return json_encode(['code'=>0,'message'=>"you have no right to do it"]);
+        $kind=yii::$app->request->post('kind')?(int)yii::$app->request->post('kind'):0;
+        $corpus_id=yii::$app->request->post('corpus_id')?(int)yii::$app->request->post('corpus_id'):0;
+        $model=new CheckService();
+        try{
+            $model->passCheck($corpus_id,$kind,yii::$app->user->getId());
+            return json_encode(['code'=>1,'message'=>'已成功提交审核']);
+        }catch (\Exception $e)
+        {
+            return json_encode(['code'=>0,'message'=>$e->getMessage()]);
         }
     }
     //测试页面

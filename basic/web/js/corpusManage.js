@@ -216,7 +216,7 @@ function addConetent(datas) {
                 "                <td>:word_kind_count</td>"+
                 "                <td>:level_name</td>\n" +
                 "                <td>"+
-                "                    <button class=\"btn btn-success\" onclick=\"showTextCorpusDetail(this,:corpus_id)\">语料详情</button>\n" +
+                "                    <button class=\"btn btn-success\" onclick=\"showTextCorpusDetail(this,:corpus_id,1)\">语料详情</button>\n" +
                 "                    <button class=\"btn btn-danger\" onclick=\"deleteTextCorpus(this,:corpus_id)\">删除语料</button>\n" +
                 "                </td>\n" +
                 "            </tr>";
@@ -234,13 +234,27 @@ function addConetent(datas) {
     }
 }
 //显示语料报表事件
-function showTextCorpusDetail(obj,coprus_id) {
+function showTextCorpusDetail(obj,coprus_id,from) {
     $("#corpusDetail").toggle();
-    $("#text_manage").toggle();
+    if(from==1)
+    {
+        $("#text_manage").toggle();
+        $("#textOpenLevel").removeAttr("disabled");
+        $("#corpusDetail").find(".btnList").html("");
+        $("#corpusDetail").find(".btnList").append("<button class=\"btn btn-primary\" onclick=\"backList(1)\">返回列表</button>");
+    }
+    else if(from==2)
+    {
+        $("#corpusCheck").toggle();
+        $("#textOpenLevel").attr("disabled","true");
+        $("#corpusDetail").find(".btnList").html("");
+        $("#corpusDetail").find(".btnList").append("<button class=\"btn btn-primary\" onclick=\"backList(2)\">返回列表</button>");
+    }
     $.get(
         "corpus-report.html",
         {'corpus_id':coprus_id},
         function (data) {
+            console.log(data);
             if(data['code']==1)
             {
                 var showData=[];
@@ -338,6 +352,8 @@ function jumpPage(obj) {
     var pages=parseInt($("#currentPage").text().split("/")[1]);
     if(jumpPage>pages)
         alert("请输入不大于"+pages+"的页数");
+    if(!jumpPage)
+        alert("请输入跳转页数");
     else {
         getPageData(jumpPage);
     }
@@ -384,9 +400,12 @@ function backDictionaryManage() {
     $("#dictionary_manage").toggle();
     $("#text_manage").toggle();
 }
-function backList() {
+function backList(to) {
     $("#corpusDetail").toggle();
-    $("#text_manage").toggle();
+    if(to==1) {
+        $("#text_manage").toggle();
+    }
+    else $("#corpusCheck").toggle();
 }
 //提交语料信息
 function addTextCorpus() {

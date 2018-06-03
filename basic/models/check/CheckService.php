@@ -13,6 +13,7 @@ namespace app\models\check;
 
 use app\models\corpus\CorporaDictionary;
 use app\models\corpus\CorporaText;
+use app\models\corpus\TextCorpora;
 use app\models\UserAthu;
 use Math\CalcHelper;
 use yii;
@@ -170,6 +171,71 @@ class CheckService extends CorporaCheckModel
         }catch (\Exception $e)
         {
             throw $e;
+        }
+    }
+
+    /**
+     * @param $corpus_id
+     * @param $kind
+     * @param $user_id
+     * @throws \Exception
+     */
+    public function passCheck($corpus_id, $kind, $user_id)
+    {
+        $db=yii::$app->db;
+        $updateTransaction=$db->beginTransaction();
+        try{
+            $db->createCommand()->update($this->_tableName,['status'=>0],['corpus_id'=>$corpus_id,'user_id'=>$user_id,'kind'=>$kind])->execute();
+            $updateTransaction->commit();
+        }catch (\Exception $e)
+        {
+            $updateTransaction->rollBack();
+            throw  $e;
+        }
+        //判断审核进程
+        $updateTransaction=$db->beginTransaction();
+        $isPass=false;
+        try{
+            $count=(int)$db->createCommand("select count(*) from $this->_tableName where status='1' and corpus_id=:corpus_id and kind=:kind",['corpus_id'=>$corpus_id,'kind'=>$kind])->queryScalar();
+            if($count<=1)//删除审核信息并修改语料库表审核
+            {
+                $isPass=true;
+                if($kind==self::KINDTEXT)
+                {
+                    $db->createCommand()->update($this->_textName,['is_checking'=>0],['corpus_id'=>$corpus_id])->execute();
+                }
+                if($kind==self::KINDDICTIONARY)
+                {
+                    $db->createCommand()->update($this->_dictionaryName,['is_checking'=>0],['corpus_id'=>$corpus_id])->execute();
+                }
+            }
+            $updateTransaction->commit();
+        }catch (\Exception $e)
+        {
+            $updateTransaction->rollBack();
+            throw  $e;
+        }
+        if($isPass)//查看是否为删除操作
+        {
+            $res=$db->createCommand("select op from $this->_tableName where corpus_id=:corpus_id and kind=:kind",['corpus_id'=>$corpus_id,'kind'=>$kind])->queryOne();
+            $db->createCommand()->delete($this->_tableName,['corpus_id'=>$corpus_id,'kind'=>$kind])->execute();
+            if($res)
+            {
+                $op=$res['op'];
+                if($op==self::OPDELETE)
+                {
+                    if($kind==self::KINDTEXT)
+                    {
+                        $model=new TextCorpora(['corpus_id'=>$corpus_id]);
+                        try{
+                            $model->deleteById();
+                        }catch (\Exception $e)
+                        {
+                            throw $e;
+                        }
+                    }
+                }
+            }
         }
     }
 }

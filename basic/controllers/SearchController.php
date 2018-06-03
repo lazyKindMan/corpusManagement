@@ -2,19 +2,20 @@
 /**
  * Created by PhpStorm.
  * User: longs
- * Date: 2018/4/26
- * Time: 15:04
+ * Date: 2018/6/3
+ * Time: 15:54
  */
 
 namespace app\controllers;
 
 
 use yii\web\Controller;
-class MainController extends Controller
+
+class SearchController extends Controller
 {
-    public $layout='mainLayout';
+    public $layout="searchLayout";
     public function actionIndex()
     {
-       return $this->redirect(['admin/login']);
+        return $this->render("index");
     }
 }

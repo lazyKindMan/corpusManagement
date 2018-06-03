@@ -10,7 +10,7 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
 use yii\captcha\Captcha;
 use yii\grid\GridView;
-$this->title='管理员用户';
+$this->title='后台管理系统';
 $code=rand(1,100);
 $this->registerJsFile('@web/js/loadMenu.js?'.$code,["depends"=>["app\assets\AppAsset"],"position"=> $this::POS_END]);
 $this->registerJsFile('@web/js/modal.js?'.$code,["depends"=>["app\assets\AppAsset"],"position"=> $this::POS_END]);
@@ -286,7 +286,9 @@ $this->registerJsFile('@web/js/corpusManage.js?'.$code,["depends"=>["app\assets\
                     <div id="chartdiv" style="height:500px;width: 400px" class="center-block"></div>
                 </div>
                 <div class="hr-div"> <hr /></div>
-                <button class="btn btn-primary" onclick="backList()">返回列表</button>
+                <div class="btnList">
+                    <button class="btn btn-primary" onclick="backList()">返回列表</button>
+                </div>
             </div>
         </div>
     </div>
