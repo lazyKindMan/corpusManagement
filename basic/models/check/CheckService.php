@@ -155,4 +155,21 @@ class CheckService extends CorporaCheckModel
             throw $e;
         }
     }
+
+    /**
+     *管理员提出用户请求删除操作
+     * @param $kind
+     * @param null $corpus_id
+     * @throws \Exception
+     */
+    public function submitDeleteOp($kind,$corpus_id=null)
+    {
+        try
+        {
+            $this->distributeCheckers($corpus_id,$kind,self::OPDELETE);
+        }catch (\Exception $e)
+        {
+            throw $e;
+        }
+    }
 }

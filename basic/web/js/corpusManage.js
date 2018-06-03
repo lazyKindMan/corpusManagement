@@ -222,6 +222,10 @@ function addConetent(datas) {
                 "            </tr>";
             content=content.format(item);
             $tableBody.append(content);
+            if(item['is_checking']=='1')
+            {
+                $("#textCorporaTable").find("[data-corpus_id='"+item['corpus_id']+"']").find(".btn-danger").attr('disabled','true');
+            }
         });
     }
     else
@@ -293,7 +297,17 @@ function showTextCorpusDetail(obj,coprus_id) {
     );
 }
 function deleteTextCorpus(obj,corpus_id) {
-
+    $.get(
+        "delete-text-corpus.html",
+        {'corpus_id':corpus_id},
+        function (data) {
+            alert(data['message'])
+            if(data['code']==1)
+            {
+                $(obj).attr('disabled','true');
+            }
+        },"json"
+    );
 }
 function createTextCorporaPage(sum,pageSize,currentPage=1) {
     var $addElement=$("#text_manage").find("#currentPage");
@@ -334,8 +348,17 @@ function clickJumpPage(obj,flag) {
     switch (flag)
     {
         case 1:getPageData(1);break;
-        case 2:getPageData(currentPage-1);break;
-        case 3:getPageData(currentPage+1);break;
+        case 2:{
+            if(currentPage==1)
+                return false;
+            getPageData(currentPage-1);
+        break;}
+        case 3:{
+            if(currentPage==pages)
+                return false;
+            getPageData(currentPage+1);
+            break;
+        }
         case 4:getPageData(pages);break;
     }
 }
@@ -373,7 +396,7 @@ function addTextCorpus() {
         dataArr[$(this).attr("name")]=$(this).val();
     });
     dataArr[$("#addTextCorpusForm").find("textarea").attr("name")]=$("#addTextCorpusForm").find("textarea").val();
-    console.log(dataArr);
+    var currentPage=parseInt($("#currentPage").text().split("/")[1]);
     $.ajax({
         url:"add-text-corpus.html",
         type:"POST",
@@ -381,7 +404,23 @@ function addTextCorpus() {
         data:dataArr,
         cache:false,
         success:function (data) {
-
+            alert(data['message']);
+            $.get(
+                "show-text-corpora.html",
+                {'offSet':currentPage},
+                function (data) {
+                    if(data['code']==1)
+                    {
+                        addConetent(data['dataArr']);
+                        createTextCorporaPage(data['allSum'],data['pageSize'],currentPage);
+                        $("#addTextCorpusModal").modal("hide");
+                    }
+                    if(data['code']==0)
+                    {
+                        alert(data['message']);
+                    }
+                },"json"
+            )
         }
     });
 }

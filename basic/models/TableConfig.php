@@ -15,4 +15,5 @@ class TableConfig
     const DictionaryCorporateTable="tb_corpora_dictionary";
     const UserLevelTable="tb_userlevel";
     const TextStatisticalTable="tb_statistical_report";
+    const TextWordTable="tb_wordlist";
 }

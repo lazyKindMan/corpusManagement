@@ -24,6 +24,7 @@ class TextCorpora
     public $fileClass;
     public $ridContent;
     public $wordArr;
+    public $corpus_id;
     private $_currentPos;
     private $_tableName;
     private $_kindArr;
@@ -43,9 +44,10 @@ class TextCorpora
                 case 'content':$this->content=$value;break;
                 case 'tableName':$this->_tableName=$value;break;
                 case 'corpus_name':$this->_corpusName=$value;break;
+                case 'corpus_id':$this->corpus_id=$value;break;
             }
         }
-        if($this->content=="")
+        if($this->content==""&&$this->corpus_id==null)
         {
             $this->fileClass=new TextFile($this->filePath);
             $this->content='';
@@ -100,6 +102,43 @@ class TextCorpora
     }
 
     /**
+     *使用填写表单形式添加语料
+     * @throws \Exception
+     */
+    public function getContextByText()
+    {
+        $lastId=-1;
+        $this->_kindArr=[];
+        $this->_ridSign();
+        $this->_splitWord();
+        try{
+            $lastId=$this->_insertItem();
+        }catch (\Exception $e)
+        {
+            throw $e;
+        }
+        if($lastId>0)
+        {
+            foreach ($this->wordArr as $word)
+            {
+                $wordClass=new TextCorporaWord($word,$this->ridContent,$this->_currentPos);
+                $this->_currentPos=$wordClass->getCurrentPos();
+                $wordClass->save($lastId);
+                unset($wordClass);
+            }
+            $this->saveStaticalReport($lastId);
+            //分配审核任务
+            $checkModel=new CheckService();
+            try{
+                $checkModel->distributeCheckers($lastId,CheckService::KINDTEXT,CheckService::OPADD);
+                return true;
+            }catch (\Exception $e)
+            {
+                throw $e;
+            }
+        }
+    }
+    /**
      * @throws \Exception
      */
     private function _insertItem()
@@ -151,6 +190,8 @@ class TextCorpora
             throw new \Exception("来源输入超过规定长度");
         if($this->_tableName===null)
             throw new \Exception("请设定表名");
+        if($this->content!=''&&strlen(preg_replace("/\s+|\n|\r/",'',$this->content))==0)
+            throw new \Exception("请输入有效非空语料");
     }
 
     private function _ridSign()
@@ -214,5 +255,48 @@ class TextCorpora
     public function getKindArr()
     {
         var_dump($this->_kindArr);
+    }
+
+    /**
+     * 删除文本语料
+     * @throws \Exception
+     */
+    public function deleteById()
+    {
+        //先删词表和报告表
+        $wordTable=TableConfig::TextWordTable;
+        $reportTable=TableConfig::TextStatisticalTable;
+        $db=yii::$app->db;
+        if($this->corpus_id==null)
+            throw new \Exception("no corpus_id in TextCorpora Class");
+        $deleteTransaction=$db->beginTransaction();
+        try{
+            $db->createCommand()->delete($wordTable,['corpus_id'=>$this->corpus_id])->execute();
+            $db->createCommand()->delete($reportTable,['corpus_id'=>$this->corpus_id])->execute();
+            $db->createCommand()->delete($this->_tableName,['corpus_id'=>$this->corpus_id])->execute();
+            $deleteTransaction->commit();
+        }catch (\Exception $e)
+        {
+            $deleteTransaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * 管理员提出删除审核请求
+     * @throws \Exception
+     */
+    public function addDeleteCheck()
+    {
+        if($this->corpus_id==null)
+            throw new \Exception("no corpus_id in TextCorpora Class");
+        $model=new CheckService();
+        try{
+            yii::$app->db->createCommand()->update($this->_tableName,['is_checking'=>1],['corpus_id'=>$this->corpus_id])->execute();
+            $model->submitDeleteOp(CheckService::KINDTEXT,$this->corpus_id);
+        }catch (\Exception $e)
+        {
+            throw $e;
+        }
     }
 }

@@ -357,7 +357,7 @@ class AdminController extends Controller
         if(!MyUser::checkCurrrentUserManageUser("语料库管理"))
             return json_encode(0);
         $pageSize=8;
-        $offSet=yii::$app->request->get('offSet')?(int)yii::$app->request->get('offSet')-1:0;
+        $offSet=yii::$app->request->get('offSet')?((int)yii::$app->request->get('offSet')-1)*$pageSize:0;
         $condition=yii::$app->request->get('condition')?(int)yii::$app->request->get('condition'):[];
         $flag=1;
         $conditionArr=[];
@@ -412,6 +412,11 @@ class AdminController extends Controller
             }
         }
     }
+
+    /**
+     * 增加文本语料库AJax页面
+     * @return string
+     */
     public function actionAddTextCorpus()
     {
         if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
@@ -422,11 +427,40 @@ class AdminController extends Controller
         {
             try {
                 $model=new TextCorpora(yii::$app->request->post());
-                var_dump($model);
+                if($model->getContextByText())
+                    return json_encode([
+                        'code'=>1,
+                        'message'=>'添加成功，进入审核'
+                    ]);
             }catch (\Exception $e)
             {
-
+                return json_encode([
+                'code'=>0,
+                'message'=>'添加成功，进入审核'
+            ]);
             }
+        }
+    }
+    public function actionDeleteTextCorpus()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理"))
+            return json_encode(0);
+        $model=new TextCorpora(yii::$app->request->get());
+        try{
+            $model->addDeleteCheck();
+            return json_encode([
+                'code'=>1,
+                'message'=>"删除成功，等待审核"
+            ]);
+        }catch (\Exception $e)
+        {
+            return json_encode([
+                'code'=>0,
+                'message'=>$e->getMessage()
+            ]);
+//            return json_encode(var_dump(yii::$app->request->get()));
         }
     }
     //测试页面
