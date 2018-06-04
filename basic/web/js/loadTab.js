@@ -150,6 +150,26 @@ function check(obj,coprus_id,kind,op) {
             )
         }
     }
+    else
+    {
+        if(confirm("你确定不批准该操作?"))
+        {
+            $.post(
+                "unpass-check.html",
+                {'corpus_id':coprus_id,'kind':kind},
+                function (data) {
+                    if(data['code']==1)
+                    {
+                        alert(data['message']);
+                        $(obj).attr("disabled",'true');
+                        $(obj).prev().attr("disabled",'true');
+                    }
+                    else
+                        alert(data['message']);
+                },"json"
+            )
+        }
+    }
 }
 function showTextCorpusDetail(obj,coprus_id,from) {
     $("#corpusDetail").toggle();
@@ -226,4 +246,108 @@ function showTextCorpusDetail(obj,coprus_id,from) {
             }
         },"json"
     );
+}
+function showDictionaryDetail(corpus_id,from) {
+    $.get(
+        "show-dictionary-report.html",
+        {'corpus_id':corpus_id},
+        function (data) {
+            if(data['code']==1)
+            {
+                if(from==1)
+                {
+                    $("#corpusManage").toggle();
+                }
+                else
+                {
+                    $("#corpusCheck").toggle();
+                }
+                $("#dictionaryCorpusDatail").toggle();
+                addDetialContent(data['report']['corpus'],from);
+
+            }
+            if(data['code']==0)
+            {
+                alert(data['message']);
+            }
+        },"json"
+    )
+}
+function addDetialContent(datas,from) {
+    $("#dictionaryCorpusDatail").html("");
+    if(datas['is_checking']==1)
+    {
+        datas['check']="正在审核";
+    }
+    else datas['check']="正常状态";
+    datas['from']=from;
+    var content="<div class=\"col-md-6 col-lg-6 col-sm-6\">\n" +
+        "                    <div>\n" +
+        "                        <label style=\"font-size: large\">语料库名:</label>\n" +
+        "                        <label style=\"font-size: large\" id=\"dictionaryCorpusName\">:corpus_name</label>\n" +
+        "                    </div>\n" +
+        "                    <div>\n" +
+        "                        <label style=\"font-size: large\">分级数:</label>\n" +
+        "                        <label style=\"font-size: large\">:all_level_count</label>\n"  +
+        "</div><div>"+
+        "                        <label style=\"font-size: large\">创建时间:</label>\n" +
+        "                        <label style=\"font-size: large\">:created_at</label>\n" +
+        "                    </div>\n" +
+        "                    <div>\n" +
+        "                        <label style=\"font-size: large\">审核状态:</label>\n" +
+        "                        <label style=\"font-size: large\" id=\"textCheckStatus\">:check</label>\n" +
+        "                    </div>"+
+        "                    <div style=\"margin-top: 30px\">\n" +
+        "                        <label style=\"font-size: large;padding-left: 0px\" class=\"col-md-3 col-lg-3 col-sm-3\">开放等级:</label>\n" +
+        "                        <div class=\"col-md-6 col-lg-6 col-sm-6\">\n" +
+        "                            <select id=\"dictioanryOpenLevel\" class=\"form-control\">\n" +
+        "                                <option value=\"2\">管理员</option>\n" +
+        "                                <option value=\"3\">普通用户</option>\n" +
+        "                            </select>\n" +
+        "                        </div>\n" +
+        "                    </div>" +
+        "</div>\n"+
+        "<div class=\"col-md-6 col-lg-6 col-sm-6\">\n" +
+        "                    <div id=\"dictionaryChart\" style=\"height:500px;width: 400px\" class=\"center-block\"></div>\n" +
+        "                </div>"+
+        "<div class=\"hr-div\"> <hr /></div>\n" +
+        "                <div class=\"btnList\">\n" +
+        "                    <button class=\"btn btn-primary\" onclick=\"dictionaryBack(:from)\">返回列表</button>\n" +
+        "                </div>";
+    content=content.format(datas);
+    $("#dictionaryCorpusDatail").append(content);
+    $("#dictionaryChart").html("");
+    $.jqplot('dictionaryChart', [showData], {
+        title:"词典语料词语数分布图",
+        seriesDefaults: {
+            renderer: $.jqplot.Pie Renderer,
+            rendererOptions: {
+                showDataLabels: true,
+                lineWidth:5,
+                shadowDepth: 5,     // 设置阴影区域的深度
+                shadowAlpha: 0.07   // 设置阴影区域的透明度
+            }
+        },
+        legend: {
+            show: true,
+            location: "e"
+        },
+        cursor: {
+            style: 'crosshair', //当鼠标移动到图片上时，鼠标的显示样式，该属性值为css类
+            show: true, //是否显示光标
+            showTooltip: true, // 是否显示提示信息栏
+            followMouse: false, //光标的提示信息栏是否随光标（鼠标）一起移动
+        }
+    });
+    if(from!=1)
+        $("#dictioanryOpenLevel").attr("disabled","true");
+    $("#dictioanryOpenLevel").val(datas['open_level']);
+
+}
+function dictionaryBack(to) {
+    $("#dictionaryCorpusDatail").toggle();
+    if(to==1) {
+        $("#corpusManage").toggle();
+    }
+    else $("#corpusCheck").toggle();
 }

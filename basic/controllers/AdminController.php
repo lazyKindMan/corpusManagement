@@ -12,6 +12,7 @@ use app\models\check\CheckService;
 use app\models\corpus\CorporaDictionary;
 use app\models\corpus\CorporaDictionaryQuery;
 use app\models\corpus\createDictionarnForm;
+use app\models\corpus\DictionaryDetailReport;
 use app\models\corpus\DictionaryUploadFile;
 use app\models\corpus\TextCorpora;
 use app\models\corpus\TextCorporaSearch;
@@ -427,7 +428,7 @@ class AdminController extends Controller
         {
             try {
                 $model=new TextCorpora(yii::$app->request->post());
-                if($model->getContextByText())
+                $model->getContextByText();
                     return json_encode([
                         'code'=>1,
                         'message'=>'添加成功，进入审核'
@@ -436,7 +437,7 @@ class AdminController extends Controller
             {
                 return json_encode([
                 'code'=>0,
-                'message'=>'添加成功，进入审核'
+                'message'=>$e->getMessage()
             ]);
             }
         }
@@ -480,6 +481,41 @@ class AdminController extends Controller
             return json_encode(['code'=>0,'message'=>$e->getMessage()]);
         }
     }
+    public function actionUnpassCheck()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料审核"))
+            return json_encode(['code'=>0,'message'=>"you have no right to do it"]);
+        $kind=yii::$app->request->post('kind')?(int)yii::$app->request->post('kind'):0;
+        $corpus_id=yii::$app->request->post('corpus_id')?(int)yii::$app->request->post('corpus_id'):0;
+        $model=new CheckService();
+        try{
+            $model->unpassCheck($corpus_id,$kind,yii::$app->user->getId());
+            return json_encode(['code'=>1,'message'=>'已成功提交审核']);
+        }catch (\Exception $e)
+        {
+            return json_encode(['code'=>0,'message'=>$e->getMessage()]);
+        }
+    }
+    public function actionShowDictionaryReport()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理")&&!MyUser::checkCurrrentUserManageUser("语料审核"))
+            return json_encode(['code'=>0,'message'=>'you have no right to do it']);
+        $model=new DictionaryDetailReport(['corpus_id'=>yii::$app->request->get('corpus_id')]);
+        try
+        {
+            $report=$model->getReport();
+            return json_encode([
+                'code'=>1,
+                'report'=>$report]);
+        }catch (\Exception $e)
+        {
+            return json_encode(['code'=>0,'message'=>$e]);
+        }
+    }
     //测试页面
 
     /**
@@ -487,26 +523,8 @@ class AdminController extends Controller
      */
     public function actionTest()
     {
-//        ini_set('memory_limit', '4096M');
-//        $model=new TextCorpora(['filePath'=>"G:/wamp64/www/basic/crawler/peopleNewsparper-199801.txt",
-//            'title'=>'人民日报98年1月',
-//            'resource'=>'人民日报',
-//            'corpus_name'=>"人民日报语料",
-//            'tableName'=>'tb_corpora_text'
-//            ]);
-//        $model->getConetntFile();
-//        $model=new TextCorpusReport(7);
-//        try{
-//            $model->getReport();
-//            var_dump($model->dataArr);
-//        }catch (\Exception $e)
-//        {
-//            echo $e->getMessage();
-//        }
-        for ($i=4004;$i<4364;$i++)
-        {
-            yii::$app->db->createCommand()->update("tb_wordlist",['corpus_id'=>14],['id'=>$i])->execute();
-        }
+        $model=new DictionaryDetailReport(['corpus_id'=>10]);
+        var_dump($model->getReport());
     }
     private static function test_input($data) {
         $data = trim($data);

@@ -196,8 +196,8 @@ class CheckService extends CorporaCheckModel
         $updateTransaction=$db->beginTransaction();
         $isPass=false;
         try{
-            $count=(int)$db->createCommand("select count(*) from $this->_tableName where status='1' and corpus_id=:corpus_id and kind=:kind",['corpus_id'=>$corpus_id,'kind'=>$kind])->queryScalar();
-            if($count<=1)//删除审核信息并修改语料库表审核
+            $count=(int)$db->createCommand("select count(*) from $this->_tableName where status='0' and corpus_id=:corpus_id and kind=:kind",['corpus_id'=>$corpus_id,'kind'=>$kind])->queryScalar();
+            if($count>=2)//删除审核信息并修改语料库表审核
             {
                 $isPass=true;
                 if($kind==self::KINDTEXT)
@@ -223,6 +223,73 @@ class CheckService extends CorporaCheckModel
             {
                 $op=$res['op'];
                 if($op==self::OPDELETE)
+                {
+                    if($kind==self::KINDTEXT)
+                    {
+                        $model=new TextCorpora(['corpus_id'=>$corpus_id]);
+                        try{
+                            $model->deleteById();
+                        }catch (\Exception $e)
+                        {
+                            throw $e;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param $corpus_id
+     * @param $kind
+     * @param $user_id
+     * @throws yii\db\Exception
+     * @throws \Exception
+     */
+    public function unpassCheck($corpus_id, $kind, $user_id)
+    {
+        $db=yii::$app->db;
+        $updateTransaction=$db->beginTransaction();
+        try{
+            //将审核状态改为2,表示未通过审核
+            $db->createCommand()->update($this->_tableName,['status'=>2],['corpus_id'=>$corpus_id,'user_id'=>$user_id,'kind'=>$kind])->execute();
+            $updateTransaction->commit();
+        }catch (\Exception $e)
+        {
+            $updateTransaction->rollBack();
+            throw  $e;
+        }
+        $updateTransaction=$db->beginTransaction();
+        $upPass=false;//判断是否达到审核未通过状态标记
+        try{
+            $count=(int)$db->createCommand("select count(*) from $this->_tableName where status='2' and corpus_id=:corpus_id and kind=:kind",['corpus_id'=>$corpus_id,'kind'=>$kind])->queryScalar();
+            if($count>=2)//删除审核信息并修改语料库表审核
+            {
+                $upPass=true;
+                if($kind==self::KINDTEXT)
+                {
+                    $db->createCommand()->update($this->_textName,['is_checking'=>0],['corpus_id'=>$corpus_id])->execute();
+                }
+                if($kind==self::KINDDICTIONARY)
+                {
+                    $db->createCommand()->update($this->_dictionaryName,['is_checking'=>0],['corpus_id'=>$corpus_id])->execute();
+                }
+            }
+            $updateTransaction->commit();
+        }catch (\Exception $e)
+        {
+            $updateTransaction->rollBack();
+            throw  $e;
+        }
+        if($upPass)
+        {
+            $res=$db->createCommand("select op from $this->_tableName where corpus_id=:corpus_id and kind=:kind",['corpus_id'=>$corpus_id,'kind'=>$kind])->queryOne();
+            $db->createCommand()->delete($this->_tableName,['corpus_id'=>$corpus_id,'kind'=>$kind])->execute();
+            //与通过审核相反，若为添加操作则进行删除信息
+            if($res)
+            {
+                $op=$res['op'];
+                if($op==self::OPADD)
                 {
                     if($kind==self::KINDTEXT)
                     {

@@ -65,15 +65,11 @@ header("Content-type: text/html; charset=utf-8");
                           'template'=>'{showCorpus}  {deleteCorpus}',
                           'buttons'=>[
                                  "showCorpus"=>function($url,$model,$key){
-                                        if($model->is_checking===1||$model->is_checking===2)
-                                        return \yii\helpers\Html::button("查看语料库",[
-                                            'title'=>'查看语料',
-                                            'class'=>"btn btn-success",
-                                            'disabled'=>"disabled"
-                                        ]);
+                                        $corpus_id=$model->corpus_id;
                                         return \yii\helpers\Html::button("查看语料库",[
                                          'title'=>'查看语料',
                                          'class'=>"btn btn-success",
+                                          'onclick'=>"showDictionaryDetail($corpus_id,1)"
                                      ]);
                                  },
                               "deleteCorpus"=>function($url,$model,$key)

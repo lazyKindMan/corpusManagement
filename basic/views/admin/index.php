@@ -290,6 +290,9 @@ $this->registerJsFile('@web/js/corpusManage.js?'.$code,["depends"=>["app\assets\
                     <button class="btn btn-primary" onclick="backList()">返回列表</button>
                 </div>
             </div>
+            <div id="dictionaryCorpusDatail" style="display: none">
+
+            </div>
         </div>
     </div>
             <div class="col-lg-3 col-md-3 col-sm-3">

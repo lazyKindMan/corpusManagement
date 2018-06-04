@@ -109,6 +109,7 @@ class TextCorpora
     {
         $lastId=-1;
         $this->_kindArr=[];
+        $this->wordArr=[];
         $this->_ridSign();
         $this->_splitWord();
         try{
@@ -208,20 +209,28 @@ class TextCorpora
     private function _splitWord()
     {
         $regx1="/\/[a-zA-Z]+/";
-        $tempContent=trim(preg_replace($regx1,"",$this->content,1));
-        $this->wordArr=preg_split("/\s+/",$tempContent);
-        $this->word_count=count($this->wordArr);
-        //调查词语种类
-        foreach ($this->wordArr as $value)
+        $rowStrs=preg_split("/\r|\n/",$this->content);
+        foreach ($rowStrs as $rowStr)
         {
-            $value=explode("/",$value)[0];
-            if(array_key_exists($value,$this->_kindArr))
-                $this->_kindArr[$value]+=1;
-            else
+            $rowStr=trim(preg_replace($regx1,"",$rowStr,1));//除去前面多余的/m等
+            $rowStr=trim($rowStr);
+            if(strlen($rowStr)>0)
             {
-                $this->_kindArr[$value]=1;
-            }
+                $this->wordArr=array_merge($this->wordArr,preg_split("/\s+/",$rowStr));
+                foreach (preg_split("/\s+/",$rowStr) as $value)
+                {
+                    $values=explode("/",$value);
+                    if(count($values)>1)
+                    {
+                        if(array_key_exists($values[0],$this->_kindArr))
+                            $this->_kindArr[$values[0]]+=1;
+                        else $this->_kindArr[$values[0]]=1;
+                    }
+
+                }
         }
+        }
+        $this->word_count=count($this->wordArr);
         $this->word_kind_count=count($this->_kindArr);
     }
 
