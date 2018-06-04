@@ -74,16 +74,19 @@ header("Content-type: text/html; charset=utf-8");
                                  },
                               "deleteCorpus"=>function($url,$model,$key)
                               {
+                                  $corpus_id=$model->corpus_id;
                                   if($model->is_deleting===1||$model->is_checking===1||$model->is_checking===2||$model->is_updating===1)
                                       return \yii\helpers\Html::button("删除语料库",[
                                           'title'=>'删除语料',
                                           'class'=>"btn btn-danger",
-                                          'disabled'=>"disabled"
+                                          'disabled'=>"disabled",
+                                          'onclick'=>"deleteDictionaryCorpus(this,$corpus_id)"
                                       ]);
 
                                  return \yii\helpers\Html::button("删除语料库",[
                                   'title'=>'删除语料',
                                   'class'=>"btn btn-danger",
+                                     'onclick'=>"deleteDictionaryCorpus(this,$corpus_id)"
                               ]);
                               }
                           ]

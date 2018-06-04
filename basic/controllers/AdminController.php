@@ -12,6 +12,7 @@ use app\models\check\CheckService;
 use app\models\corpus\CorporaDictionary;
 use app\models\corpus\CorporaDictionaryQuery;
 use app\models\corpus\createDictionarnForm;
+use app\models\corpus\DictionaryCorpus;
 use app\models\corpus\DictionaryDetailReport;
 use app\models\corpus\DictionaryUploadFile;
 use app\models\corpus\TextCorpora;
@@ -464,6 +465,21 @@ class AdminController extends Controller
 //            return json_encode(var_dump(yii::$app->request->get()));
         }
     }
+    public function actionDeleteDictionaryCorpus()
+    {
+        if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
+            return json_encode(0);
+        if(!MyUser::checkCurrrentUserManageUser("语料库管理"))
+            return json_encode(['code'=>0,'message'=>"you have no right"]);
+        try{
+            $model=new DictionaryCorpus(['corpus_id'=>yii::$app->request->get('corpus_id')]);
+            $model->submitDelete();
+            return json_encode(['code'=>1,'message'=>"提交成功，进入审核"]);
+        }catch (\Exception $e)
+        {
+            return json_encode(['code'=>0,'message'=>$e->getMessage()]);
+        }
+    }
     public function actionPassCheck()
     {
         if(yii::$app->user->isGuest||!MyUser::validateAdmin(yii::$app->user->id))
@@ -523,8 +539,8 @@ class AdminController extends Controller
      */
     public function actionTest()
     {
-        $model=new DictionaryDetailReport(['corpus_id'=>10]);
-        var_dump($model->getReport());
+//       $model=new DictionaryCorpus(['corpus_id'=>16]);
+//       $model->deleteById();
     }
     private static function test_input($data) {
         $data = trim($data);

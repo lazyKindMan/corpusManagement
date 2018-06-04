@@ -15,6 +15,6 @@ class MainController extends Controller
     public $layout='mainLayout';
     public function actionIndex()
     {
-       return $this->redirect(['admin/login']);
+       return $this->redirect(['search/index']);
     }
 }

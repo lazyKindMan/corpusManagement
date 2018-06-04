@@ -443,3 +443,14 @@ function addTextCorpus() {
         }
     });
 }
+function deleteDictionaryCorpus(obj,corpus_id) {
+    $.get(
+        "delete-dictionary-corpus.html",
+        {'corpus_id':corpus_id},
+        function (data) {
+            if(data['code']==1)
+                $(obj).attr("disabled","true");
+            alert(data['message']);
+        },"json"
+    );
+}

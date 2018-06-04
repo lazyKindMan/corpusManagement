@@ -12,7 +12,7 @@ $this->registerCssFile("@web/css/search-form.css",["depends"=>["app\assets\AppAs
 <header class="htmleaf-header">
     <h1>语料检索系统<span>点击下面按钮进行检索</span></h1>
     <div class="htmleaf-links">
-        <a class="htmleaf-icon icon-htmleaf-home-outline" href="http://localhost/" title="进入管理员登录界面" target="_blank"><span> 进入后台管理</span></a>
+        <a class="htmleaf-icon icon-htmleaf-home-outline" href="http://localhost/admin/login.html" title="进入管理员登录界面" target="_blank"><span> 进入后台管理</span></a>
         <a class="htmleaf-icon icon-htmleaf-arrow-forward-outline" href="javascript:" title="查询检索规则" target="_blank"><span> 检索规则</span></a>
     </div>
 </header>

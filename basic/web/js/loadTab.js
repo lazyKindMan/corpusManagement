@@ -33,7 +33,7 @@ function createCheckTable(datas,kind) {
     if(kind=='dictionary')
     {
         var $tableBody=$("#dictionaryCheckTable").find("tbody");
-        buttonE="<button class=\"showDetail btn btn-primary\">查看详情</button>";
+        buttonE="<button class=\"showDetail btn btn-primary\" onclick='showDictionaryDetail(:corpus_id,2)'>查看详情</button>";
     }
     else if(kind=='text')
     {
@@ -254,6 +254,7 @@ function showDictionaryDetail(corpus_id,from) {
         function (data) {
             if(data['code']==1)
             {
+                console.log(data);
                 if(from==1)
                 {
                     $("#corpusManage").toggle();
@@ -264,7 +265,7 @@ function showDictionaryDetail(corpus_id,from) {
                 }
                 $("#dictionaryCorpusDatail").toggle();
                 addDetialContent(data['report']['corpus'],from);
-
+                createDictionaryChart(data['report']['level']);
             }
             if(data['code']==0)
             {
@@ -317,32 +318,52 @@ function addDetialContent(datas,from) {
     content=content.format(datas);
     $("#dictionaryCorpusDatail").append(content);
     $("#dictionaryChart").html("");
-    $.jqplot('dictionaryChart', [showData], {
-        title:"词典语料词语数分布图",
-        seriesDefaults: {
-            renderer: $.jqplot.Pie Renderer,
-            rendererOptions: {
-                showDataLabels: true,
-                lineWidth:5,
-                shadowDepth: 5,     // 设置阴影区域的深度
-                shadowAlpha: 0.07   // 设置阴影区域的透明度
-            }
-        },
-        legend: {
-            show: true,
-            location: "e"
-        },
-        cursor: {
-            style: 'crosshair', //当鼠标移动到图片上时，鼠标的显示样式，该属性值为css类
-            show: true, //是否显示光标
-            showTooltip: true, // 是否显示提示信息栏
-            followMouse: false, //光标的提示信息栏是否随光标（鼠标）一起移动
-        }
-    });
     if(from!=1)
         $("#dictioanryOpenLevel").attr("disabled","true");
     $("#dictioanryOpenLevel").val(datas['open_level']);
 
+}
+function createDictionaryChart(datas) {
+    $("#dictionaryChart").html("");
+    var showData=[];
+    for(var key in datas)
+    {
+        showData.push([datas[key]['levelname'],parseInt(datas[key]['levelCount'])]);
+    }
+    $.jqplot('dictionaryChart', [showData], {
+        title:"词典语料词语数分布图",
+        legend: { show: true, location: 'w' }, //提示工具栏--show：是否显示,location: 显示位置 (e:东,w:西,s:南,n:北,nw:西北,ne:东北,sw:西南,se:东南)
+        series: [
+            {
+                label: '词数',
+                // lineWidth: 8, //线条粗细
+                markerOptions: { size: 9, style: "circle" }  // 节点配置
+            }
+        ], //提示工具栏
+        seriesDefaults: {
+            pointLabels: { show: true, ypadding: -1 }, //数据点标签
+            renderer: $.jqplot.BarRenderer, //使用柱状图表示
+            //柱状体组之间间隔
+            rendererOptions: {barMargin: 25}
+        },
+        axes: {
+            xaxis: {
+                label: "分级种类",  //x轴显示标题
+                pad: 5,
+                renderer: $.jqplot.CategoryAxisRenderer, //x轴绘制方式
+                tickOptions: {
+
+                    fontSize: '10pt'
+                },
+                mark: 'cross'
+            },
+            yaxis: {
+                label: "词数", // y轴显示标题
+                min: 0,
+                //tickInterval: 10,     //网格线间隔大小
+            }
+        }
+    });
 }
 function dictionaryBack(to) {
     $("#dictionaryCorpusDatail").toggle();

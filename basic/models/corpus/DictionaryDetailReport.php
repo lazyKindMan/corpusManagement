@@ -87,6 +87,7 @@ class DictionaryDetailReport
         try {
             $this->_relationLink[$level]['levelCount']=(int)$db->createCommand("select count(*) from $tableName")->queryScalar();
         } catch (yii\db\Exception $e) {
+            /** @var TYPE_NAME $e */
             throw $e;
         }
 

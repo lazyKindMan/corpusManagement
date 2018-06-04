@@ -13,6 +13,7 @@ namespace app\models\check;
 
 use app\models\corpus\CorporaDictionary;
 use app\models\corpus\CorporaText;
+use app\models\corpus\DictionaryCorpus;
 use app\models\corpus\TextCorpora;
 use app\models\UserAthu;
 use Math\CalcHelper;
@@ -234,6 +235,16 @@ class CheckService extends CorporaCheckModel
                             throw $e;
                         }
                     }
+                    if($kind==self::KINDDICTIONARY)
+                    {
+                        $model=new DictionaryCorpus(['corpus_id'=>$corpus_id]);
+                        try{
+                            $model->deleteById();
+                        }catch (\Exception $e)
+                        {
+                            throw $e;
+                        }
+                    }
                 }
             }
         }
@@ -294,6 +305,16 @@ class CheckService extends CorporaCheckModel
                     if($kind==self::KINDTEXT)
                     {
                         $model=new TextCorpora(['corpus_id'=>$corpus_id]);
+                        try{
+                            $model->deleteById();
+                        }catch (\Exception $e)
+                        {
+                            throw $e;
+                        }
+                    }
+                    if($kind==self::KINDDICTIONARY)
+                    {
+                        $model=new DictionaryCorpus(['corpus_id'=>$corpus_id]);
                         try{
                             $model->deleteById();
                         }catch (\Exception $e)
