@@ -92,14 +92,6 @@ $this->registerJsFile('@web/js/corpusManage.js?'.$code,["depends"=>["app\assets\
                                 return ['id'=>"tr-".$model->id];
                             },
                             'columns' => [
-                                [
-                                    'class' => 'yii\grid\CheckboxColumn',
-                                    //'cssClass'=>'_check',//不能用？？？？后面有js实现的
-                                    //底部第一列占6格，其他列隐藏，形成合并1个单元格效果
-                                    'footerOptions'=>['colspan'=>6],
-                                    'footer'=>'<a href="javascript:;" class="_delete_all" data-url="'.Yii::$app->urlManager->createUrl(['/attend/delete_all']).'">删除全部</a>',
-
-                                ],
                                 //行号
                                 [
                                     'class' => 'yii\grid\SerialColumn',

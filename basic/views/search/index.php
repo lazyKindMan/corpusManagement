@@ -8,7 +8,9 @@
 $this->registerCssFile("@web/css/default.css",["depends"=>["app\assets\AppAsset"]]);
 $this->registerCssFile("@web/css/normalize.css",["depends"=>["app\assets\AppAsset"]]);
 $this->registerCssFile("@web/css/search-form.css",["depends"=>["app\assets\AppAsset"]]);
+$this->registerJsFile("https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js",["depends"=>["app\assets\AppAsset"]]);
 ?>
+<div id="searchBar">
 <header class="htmleaf-header">
     <h1>语料检索系统<span>点击下面按钮进行检索</span></h1>
     <div class="htmleaf-links">
@@ -17,11 +19,11 @@ $this->registerCssFile("@web/css/search-form.css",["depends"=>["app\assets\AppAs
     </div>
 </header>
 <section class="htmleaf-container">
-    <form onsubmit="submitFn(this, event);">
+    <form onsubmit="submitFn(this, event);" action="search.html" method="get">
         <div class="search-wrapper">
             <div class="input-holder">
-                <input type="text" class="search-input" placeholder="输入关键词进行检索" />
-                <button class="search-icon" onclick="searchToggle(this, event);"><span></span></button>
+                <input class="search-input" placeholder="输入关键词进行检索" name="condition"/>
+                <button type="submit" class="search-icon" onclick="searchToggle(this, event);"><span></span></button>
             </div>
             <span class="close" onclick="searchToggle(this, event);"></span>
             <div class="result-container">
@@ -30,38 +32,20 @@ $this->registerCssFile("@web/css/search-form.css",["depends"=>["app\assets\AppAs
         </div>
     </form>
 </section>
+</div>
+<div class="modal fade" id="searchModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>检索结果</h5></div>
+            <div class="modal-body">
 
-<script type="text/javascript">
-    function searchToggle(obj, evt){
-        var container = $(obj).closest('.search-wrapper');
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 
-        if(!container.hasClass('active')){
-            container.addClass('active');
-            evt.preventDefault();
-        }
-        else if(container.hasClass('active') && $(obj).closest('.input-holder').length == 0){
-            container.removeClass('active');
-            // clear input
-            container.find('.search-input').val('');
-            // clear and hide result container when we press close
-            container.find('.result-container').fadeOut(100, function(){$(this).empty();});
-        }
-    }
 
-    function submitFn(obj, evt){
-        value = $(obj).find('.search-input').val().trim();
-
-        _html = "Yup yup! Your search text sounds like this: ";
-        if(!value.length){
-            _html = "Yup yup! Add some text friend :D";
-        }
-        else{
-            _html += "<b>" + value + "</b>";
-        }
-
-        $(obj).find('.result-container').html('<span>' + _html + '</span>');
-        $(obj).find('.result-container').fadeIn(100);
-
-        evt.preventDefault();
-    }
-</script>
